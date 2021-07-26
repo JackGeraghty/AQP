@@ -1,0 +1,44 @@
+{
+    "root": {
+        "id_": 0,
+        "adjacent_nodes": [1, 2],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_one": {
+        "id_": 1,
+        "adjacent_nodes": [3],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_two": {
+        "id_": 2,
+        "adjacent_nodes": [4],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_three": {
+        "id_": 3,
+        "adjacent_nodes": [6],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_four": {
+        "id_": 4,
+        "adjacent_nodes": [5],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_five": {
+        "id_": 5,
+        "adjacent_nodes": [6],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    },
+    "n_six": {
+        "id_": 6,
+        "adjacent_nodes": [],
+        "class_name": "IdentityNode",
+        "module": "identitynode"
+    }
+}
