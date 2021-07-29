@@ -1,70 +1,56 @@
 import argparse
 import json
+import logging
+import sys
 import networkx as nx
-import matplotlib.pyplot as plt
 
 from pathlib import Path
-from nodes.node import deserialize
+from nodes.graphnode import build_graph, build_traversal_dfs, build_expanded_traversal
+from networkx.drawing.nx_pydot import write_dot
 
-VERSION = '0.1'
+VERSION = '0.5'
+logging.basicConfig(format='%(asctime)s, %(levelname)s %(message)s', datefmt='%H:%M:%S')
+logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+LOGGER = logging.getLogger('Pipeline')
 
 def main() -> None:
     parser = init_argparser()
     args = parser.parse_args()
-    call_graph = build_graph(args.graph_config_path)
     
-    if args.plot_call_graph:    
-        nx.draw_planar(call_graph, with_labels=True)
-        plt.draw()
-
-    result = {
-            'ref_signal_path': 'resources/ref.wav',
-            'deg_signal_path': 'resources/deg.wav',
-    }
-
-    traversal_order = build_traversal_dfs(call_graph, [], 0)
+    if args.plot_call_graph and not args.graph_output_file:
+        raise ValueError('If plotting call graph then the output file must also be specified')
+        sys.exit(-1)
+    
+    call_graph = load_graph_from_file(args.graph_config_path)
+    
+    result = {}
+    
+    traversal_order = build_traversal_dfs(call_graph, [], "root")
+    LOGGER.debug("Pipeline Traversal Order: %s", traversal_order)
+    expanded_traversal_order = build_expanded_traversal(call_graph, [], "root")
+    LOGGER.debug("Pipeline Expanded Traversal Order %s", expanded_traversal_order)
+    
+    if args.plot_call_graph:
+        expanded_name = args.graph_output_file + '_expanded.dot'
+        g=build_graph_from_list(expanded_traversal_order)
+        write_dot(g, expanded_name)
+        write_dot(call_graph, args.graph_output_file + '.dot')    
+    
     for n_id in traversal_order:
         result = call_graph.nodes[n_id]['data'].execute(result)
-        
+     
     return
 
 
-def build_traversal_dfs(graph: nx.DiGraph, traversal_list: list[int], node: int) -> list[int]:
-    '''
-    Slightly modified depth first search(dfs). Difference being regular dfs 
-    marks nodes as visited so in the situation where a two nodes of different
-    branches point to a shared node, that shared node will only get visited once.
-    
-    The pipeline doesn't want this functionality, in that situation, the shared
-    node should be visited twice.
-    
-    Traversal list is build using recursion. Stopping condition is a node is
-    reached that has no children.
+def build_graph_from_list(input_list):
+    graph = nx.DiGraph()
+    graph.add_nodes_from(input_list)        
+    graph.add_edges_from([(input_list[i], input_list[i+1]) for i in range(len(input_list)-1)])
+    return graph
 
-    Parameters
-    ----------
-    graph : nx.DiGraph
-        The graph representing the pipeline.
-    traversal_list : list[int]
-        A list used to store the traversal order. 
-    node : int
-        The current node index being evaluated.
 
-    Returns
-    -------
-    traversal_list[int]
-        A list containing the traversal order of the graph.
-
-    '''
-    traversal_list.append(node)
-    children = graph.nodes[node]['data'].children
-    for n in children:
-        build_traversal_dfs(graph, traversal_list, n)
-    
-    return traversal_list
-    
-
-def build_graph(path_to_graph_config: str) -> nx.DiGraph:
+def load_graph_from_file(path_to_graph_config: str) -> nx.DiGraph:
     '''
     Builds the call_graph from the graph configuration file given to the 
     program via command-line
@@ -75,21 +61,17 @@ def build_graph(path_to_graph_config: str) -> nx.DiGraph:
         The call_graph built from the config file
 
     '''
-    edges = []
-    graph = nx.DiGraph()
-    with open(Path(path_to_graph_config), 'rb') as file_data:
-        data = json.load(file_data)
-        for node in data:
-            node_id = data[node]['id_']
-            adjacent_nodes = data[node].pop('adjacent_nodes')
-            graph.add_node(node_id, data=deserialize(data[node]) )
-            if len(adjacent_nodes) > 0:
-                graph.nodes[node_id]['data'].children.update(adjacent_nodes)
-                edges.extend([(node_id, other_id) for other_id in adjacent_nodes])
-    graph.add_edges_from(edges)
-    return graph
-
-
+       
+    try:    
+        with open(Path(path_to_graph_config), 'rb') as file_data:
+            data = json.load(file_data)
+    except FileNotFoundError as err:
+        LOGGER.warn('%s', err)
+        sys.exit(-1)
+    
+    return build_graph(data)
+            
+        
 def init_argparser() -> argparse.ArgumentParser:
     """
         Creates an argument parser with all of the possible
@@ -106,6 +88,7 @@ def init_argparser() -> argparse.ArgumentParser:
     optional = parser.add_argument_group('Optional Arguments')
     optional.add_argument('--graph_config_path', default='config/graph.json')
     optional.add_argument('--plot_call_graph', action='store_true', default=False)
+    optional.add_argument('--graph_output_file', default='results/graph')
     optional.add_argument('-v', '--version', action='version', version=f'{parser.prog} version {VERSION}')
     return parser
 
