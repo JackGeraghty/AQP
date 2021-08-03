@@ -1,5 +1,6 @@
 from pesq import pesq
 import numpy as np
+import librosa
 
 class Pypesq:
     def __init__(self, ref_file, deg_file):
