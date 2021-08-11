@@ -1,4 +1,6 @@
-from .node import Node
+import logging
+import qualitymetrics.visqol.constants as constants
+from .node import ViSQOLNode
 from pathlib import Path
 from json import load
 from qualitymetrics.visqol.analysiswindow import AnalysisWindow
@@ -6,13 +8,14 @@ from qualitymetrics.visqol.channelconfig import ChannelConfig, setup_channel_con
 from qualitymetrics.visqol.filterbank import create_filterbank, MelFilter
 from qualitymetrics.visqol.visqolarguments import VisqolArguments
 from qualitymetrics.visqol.visqoloptions import VisqolOptions
-import qualitymetrics.visqol.constants as constants
 
+LOGGER = logging.getLogger('pipeline')
 
-class VisqolStructuresNode(Node):
+class VisqolStructuresNode(ViSQOLNode):
    
-    def __init__(self, id_, children, output_key, config_file_path='config/visqol/structures_config.json', **kwargs): 
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key, 
+                 config_file_path='config/visqol/structures_config.json', draw_options=None, **kwargs): 
+        super().__init__(id_, children, output_key, draw_options)
         self._config_file_path = Path(config_file_path)
         self.options = self._construct_visqol_options()
         self.type_: str = 'VisqolStructuresNode'
@@ -52,8 +55,8 @@ class VisqolStructuresNode(Node):
                         'channel_config': channel_config
                     }
         except FileNotFoundError as err:
-            print(err)
-            print('Using default configurations for the AnalysisWindow, ChannelConfig and Filterbank')
+            LOGGER.error("%s", err)
+            LOGGER.info('Using default configurations for the AnalysisWindow, ChannelConfig and Filterbank')
             return {
                     'visqol_args': VisqolArguments(),
                     'analysis_window': AnalysisWindow,

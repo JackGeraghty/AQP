@@ -1,11 +1,14 @@
-from .node import Node, deserialize
+import logging
+from .node import AQPNode, deserialize
 
-class LoopNode(Node):
+LOGGER = logging.getLogger('pipeline')
+
+class LoopNode(AQPNode):
     
-    def __init__(self, id_, children, output_key, node_data, iterable_key, **kwargs):
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key, node_data, iterable_key, draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.iterable_key = iterable_key
-        node_data['id_']=self.id_
+        node_data['id_'] = self.id_
         self.execution_node = deserialize(node_data)
         self.type_ = 'LoopNode'
 
@@ -14,7 +17,7 @@ class LoopNode(Node):
         super().execute(result)
         results = {}
         for i in result[self.iterable_key]:
-            print(f'Running on iterable entry: {i}')
+            LOGGER.info("Running on iterable entry: %s", i)
             result_copy = result.copy()
             result_copy['iterator_key'] = i
             result_copy = self.execution_node.execute(result_copy, var=i)

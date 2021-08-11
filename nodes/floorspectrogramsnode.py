@@ -1,15 +1,17 @@
 import numpy as np
-from .node import Node
+from .node import ViSQOLNode
 
-class FloorSpectrogramsNode(Node):
+
+class FloorSpectrogramsNode(ViSQOLNode):
     
     def __init__(self, id_: int, children: list, output_key: str,
                  reference_signal_key: str = 'reference_signal',
                  degraded_signal_key: str='degraded_signal', 
                  reference_spect_key: str='reference_spect',
                  degraded_spect_key: str='degraded_spect', 
-                 arguments_key: str='visqol_args', **kwargs):
-        super().__init__(id_, children, output_key)
+                 arguments_key: str='visqol_args', 
+                 draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.reference_signal_key = reference_signal_key
         self.degraded_signal_key = degraded_signal_key
         self.reference_spect_key = reference_spect_key

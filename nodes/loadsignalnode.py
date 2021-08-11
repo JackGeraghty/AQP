@@ -1,13 +1,16 @@
 import sys
-from .node import Node
+import logging
+from .node import AQPNode
 from pathlib import Path
 from librosa import load
 
-class LoadSignalNode(Node):
+LOGGER = logging.getLogger('pipeline')
+
+class LoadSignalNode(AQPNode):
     
     def __init__(self, id_, children, output_key, signal_path=None, signal_key=None,
-                 target_sample_rate: int=48000, mono: bool=False, **kwargs):
-        super().__init__(id_, children, output_key)
+                 target_sample_rate: int=48000, mono: bool=False, draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         if signal_path and signal_key:
             raise ValueError("Cannot set both signal_path and signal_key. Use only one")
             
@@ -33,5 +36,5 @@ class LoadSignalNode(Node):
         try:
             return load(converted_path, sr=self.target_sample_rate, mono=self.mono)[0]
         except(FileNotFoundError) as err:
-            print(err)
+            LOGGER.error("%s", err)
             sys.exit(1)

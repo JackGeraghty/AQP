@@ -1,11 +1,12 @@
-from .node import Node
 import qualitymetrics.visqol.dsp as dsp
+from .node import ViSQOLNode
 
-class ReferencePatchNode(Node):
+
+class ReferencePatchNode(ViSQOLNode):
     
     def __init__(self, id_, children, output_key='reference_patches', signal_key='reference_spect',
-                 patch_indexes_key='reference_patch_indexes',**kwargs):
-        super().__init__(id_, children, output_key)
+                 patch_indexes_key='reference_patch_indexes', draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.signal_key = signal_key        
         self.patch_indexes_key = patch_indexes_key
         self.type_ = 'ReferencePatchNode'

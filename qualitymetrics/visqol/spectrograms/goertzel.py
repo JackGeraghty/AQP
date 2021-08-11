@@ -11,7 +11,7 @@ from queue import Empty
 from qualitymetrics.visqol.filterbank import Filterbank
 from qualitymetrics.visqol.analysiswindow import AnalysisWindow
 
-LOGGER = logging.getLogger('ViSQOL')
+LOGGER = logging.getLogger('pipeline')
 
 def goertzel(signal: np.ndarray,
              sample_rate: int,

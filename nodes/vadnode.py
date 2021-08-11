@@ -1,12 +1,12 @@
 import pyvad
 import numpy as np
-from .node import Node
+from .node import ViSQOLNode
 from qualitymetrics.visqol.constants import PATCH_SIZE
 
-class VADNode(Node):
+class VADNode(ViSQOLNode):
     
-    def __init__(self, id_, children, output_key=None, **kwargs):
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key=None, draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.type_ = 'VADNode'
         
         

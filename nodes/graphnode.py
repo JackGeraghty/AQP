@@ -1,12 +1,11 @@
 import networkx as nx
-from .node import Node, deserialize
+from .node import AQPNode, deserialize
 from .loopnode import LoopNode
 
-
-class GraphNode(Node):
+class GraphNode(AQPNode):
     
-    def __init__(self, id_, children, subgraph, sub_root_id, **kwargs):
-        super().__init__(id_, children)
+    def __init__(self, id_, children, subgraph, sub_root_id, draw_options=None, **kwargs):
+        super().__init__(id_, children, draw_options=draw_options)
         self.graph = build_graph(subgraph)
         self.sub_root_id = sub_root_id
         self.traversal_order = build_traversal_dfs(self.graph, [], self.sub_root_id)
@@ -60,27 +59,44 @@ def build_graph(graph_definition: dict):
     for node in graph_definition:
         graph_definition[node]['id_'] = node
         adjacent_nodes = graph_definition[node]['children']
-        
-        graph.add_node(node, data=deserialize(graph_definition[node]))
+        node_ = deserialize(graph_definition[node])
+        graph.add_node(node, data=node_)
+    
         if len(adjacent_nodes) > 0:
             edges.extend([(node, other_id) for other_id in adjacent_nodes])
     graph.add_edges_from(edges)
     return graph
 
 
-def build_expanded_traversal(graph,traversal_list, root):
-    traversal_list.append(root)
-    current_node = graph.nodes[root]
-
+def expand_graph(graph, node, expanded_graph=nx.DiGraph(), edge_list=[]):
+    current_node = graph.nodes[node]
+    
+    expanded_graph.add_node(node, data=current_node['data'])
+    edge_list.extend( [e for e in graph.out_edges(node)])
+    
     if isinstance(current_node['data'], LoopNode) and isinstance(current_node['data'].execution_node, GraphNode):
+        edges_to_rework = [ e for e in graph.out_edges(node)]
+        
         graph_node = current_node['data'].execution_node
-        build_expanded_traversal(graph_node.graph, traversal_list, graph_node.sub_root_id)
+        
+        for i in range(len(edges_to_rework)): 
+            edge_list.pop()
+        
+        # Add an edge between the loop node and the first node of the subgraph
+        edge_list.append((node, graph_node.sub_root_id))
+        expand_graph(graph_node.graph, graph_node.sub_root_id, expanded_graph)
 
+        # Create an edge between the last node of the subgraph and the children
+        # of the loop node
+        last_loop_node = edge_list[-1][1]
+        for edge in edges_to_rework:
+            edge_list.append((last_loop_node, edge[1]))
+            
     if isinstance(current_node['data'], GraphNode):
-        build_expanded_traversal(current_node['data'].graph, traversal_list, current_node['data'].sub_root_id)
-        
-    children = current_node['data'].children
-    for n_id in children:
-        build_expanded_traversal(graph, traversal_list, n_id)
-        
-    return traversal_list
+        expand_graph(current_node['data'].graph, current_node['data'].sub_root_id, expanded_graph)
+    
+    for child_node in current_node['data'].children:
+        expand_graph(graph, child_node, expanded_graph)
+    
+    expanded_graph.add_edges_from(edge_list)
+    return expanded_graph

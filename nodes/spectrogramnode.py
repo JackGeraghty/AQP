@@ -1,11 +1,11 @@
-from .node import Node
 import qualitymetrics.visqol.spectrograms.spectrogram as spectrogram
+from .node import ViSQOLNode
 
 
-class SpectrogramNode(Node):
+class SpectrogramNode(ViSQOLNode):
     
-    def __init__(self, id_, children, output_key, signal_key, **kwargs):
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key, signal_key,  draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.signal_key = signal_key
         self.type_ = 'SpectrogramNode'
     

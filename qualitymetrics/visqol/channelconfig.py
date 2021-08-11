@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List
 
-LOGGER = logging.getLogger('ViSQOL')
+LOGGER = logging.getLogger('pipeline')
 
 @dataclass(frozen=True)
 class ChannelConfig:

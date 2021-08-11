@@ -9,7 +9,7 @@ from scipy.interpolate import RectBivariateSpline
 from scipy.signal import hilbert, correlate, correlation_lags
 PATCH_SIZE = 30
 
-LOGGER = logging.getLogger('ViSQOL')
+LOGGER = logging.getLogger('pipeline')
 
 def calculate_SPL(signal: np.ndarray) -> float:
     return 20 * math.log10(math.sqrt(np.mean(np.square(signal))) / 20e-6)

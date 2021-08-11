@@ -1,14 +1,16 @@
-from .node import Node
+from .node import AQPNode
 
-class IdentityNode(Node):
+class IdentityNode(AQPNode):
     '''
         Identity node represents a node which performs no action on the previous
         result and simply passes the result along. 
         
         USE CASE: Testing graph structure
     '''
-    def __init__(self, id_, children, output_key='None', **kwargs):
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key='None', draw_options=None, **kwargs):
+        if draw_options:
+            draw_options['shape'] = 'oval'
+        super().__init__(id_, children, draw_options=draw_options, **kwargs)
         self.type_ = 'IdentityNode'
 
 

@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from scipy.signal.windows import triang, hann
 from qualitymetrics.visqol.constants import BAND_FREQUENCIES
 
-LOGGER = logging.getLogger('ViSQOL')
+LOGGER = logging.getLogger('pipeline')
 
 @dataclass
 class Filterbank:
@@ -133,7 +133,6 @@ def create_filterbank(configuration_dict: dict) -> Filterbank:
         filterbank_name = configuration_dict['name']
         try:
             if filterbank_name == 'mel':
-                print(configuration_dict)
                 return MelFilter(**configuration_dict)
             elif filterbank_name == 'gammatone':
                 return GammatoneFilter(**configuration_dict)

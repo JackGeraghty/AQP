@@ -1,23 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 29 17:21:09 2021
-
-@author: jgera
-"""
-from .node import Node
 import qualitymetrics.visqol.dsp as dsp
+from .node import ViSQOLNode
 
 
-class VisqolChannelNode(Node):
+class VisqolChannelNode(ViSQOLNode):
     
     def __init__(self, id_, children, output_key=None,
                  reference_signal_key='reference_signal',
-                 degraded_signal_key='degraded_signal', **kwargs):
-        super().__init__(id_, children, output_key)
+                 degraded_signal_key='degraded_signal', draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.reference_signal_key = reference_signal_key
         self.degraded_signal_key = degraded_signal_key
         self.type_ = 'VisqolChannelNode'
         
+    
     def execute(self, result, **kwargs):
         super().execute(result)
         reference = dsp.extract_channel(result[self.reference_signal_key], kwargs['var'])

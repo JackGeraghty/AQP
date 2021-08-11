@@ -5,47 +5,50 @@ import sys
 import networkx as nx
 
 from pathlib import Path
-from nodes.graphnode import build_graph, build_traversal_dfs, build_expanded_traversal
+from nodes.graphnode import build_graph, build_traversal_dfs, expand_graph
 from networkx.drawing.nx_pydot import write_dot
 
 VERSION = '0.5'
 logging.basicConfig(format='%(asctime)s, %(levelname)s %(message)s', datefmt='%H:%M:%S')
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+LOGGER = logging.getLogger('pipeline')
 
-LOGGER = logging.getLogger('Pipeline')
 
 def main() -> None:
     parser = init_argparser()
     args = parser.parse_args()
-    
+    LOGGER.setLevel(logging.DEBUG if args.debug else logging.INFO)
     if args.plot_call_graph and not args.graph_output_file:
         raise ValueError('If plotting call graph then the output file must also be specified')
         sys.exit(-1)
     
     call_graph = load_graph_from_file(args.graph_config_path)
-    
     result = {}
     
-    traversal_order = build_traversal_dfs(call_graph, [], "root")
-    LOGGER.debug("Pipeline Traversal Order: %s", traversal_order)
-    expanded_traversal_order = build_expanded_traversal(call_graph, [], "root")
-    LOGGER.debug("Pipeline Expanded Traversal Order %s", expanded_traversal_order)
+    traversal_order = build_traversal_dfs(call_graph, [], args.root_node_id)
+    LOGGER.debug("Pipeline Traversal Order: %s", traversal_order)    
     
     if args.plot_call_graph:
+        expanded_graph = expand_graph(call_graph, args.root_node_id)
         expanded_name = args.graph_output_file + '_expanded.dot'
-        g=build_graph_from_list(expanded_traversal_order)
-        write_dot(g, expanded_name)
+        for node in expanded_graph.nodes:
+            draw_options = expanded_graph.nodes[node]['data'].draw_options
+            if draw_options:
+                expanded_graph.nodes[node].update(draw_options)
+        write_dot(expanded_graph, expanded_name)
         write_dot(call_graph, args.graph_output_file + '.dot')    
+        LOGGER.info('Graphs written to .dot files')
     
     for n_id in traversal_order:
         result = call_graph.nodes[n_id]['data'].execute(result)
-     
+    
     return
 
 
 def build_graph_from_list(input_list):
     graph = nx.DiGraph()
-    graph.add_nodes_from(input_list)        
+    for node in input_list:
+        graph.add_node(node)
+
     graph.add_edges_from([(input_list[i], input_list[i+1]) for i in range(len(input_list)-1)])
     return graph
 
@@ -84,11 +87,13 @@ def init_argparser() -> argparse.ArgumentParser:
     """
 
     parser = argparse.ArgumentParser(usage="%(prog)s",description="AQP")
-    
+    required = parser.add_argument_group('Required Arguments')
+    required.add_argument('--root_node_id', required=True)
     optional = parser.add_argument_group('Optional Arguments')
     optional.add_argument('--graph_config_path', default='config/graph.json')
     optional.add_argument('--plot_call_graph', action='store_true', default=False)
     optional.add_argument('--graph_output_file', default='results/graph')
+    optional.add_argument('--debug', action='store_true', default=False)
     optional.add_argument('-v', '--version', action='version', version=f'{parser.prog} version {VERSION}')
     return parser
 

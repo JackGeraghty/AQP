@@ -1,13 +1,15 @@
 import math
 import numpy as np
-from .node import Node
+from .node import ViSQOLNode
 
-class ScaleSignalsNode(Node):
+
+class ScaleSignalsNode(ViSQOLNode):
     
     def __init__(self, id_, children,  
                  ref_sig_key='reference_signal', 
-                 deg_sig_key='degraded_signal', **kwargs):
-        super().__init__(id_, children)
+                 deg_sig_key='degraded_signal',
+                 draw_options=None, **kwargs):
+        super().__init__(id_, children, draw_options=draw_options)
         self.ref_sig_key = ref_sig_key
         self.deg_sig_key = deg_sig_key
         self.type_ = 'ScaleSignalNode'

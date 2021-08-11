@@ -1,12 +1,14 @@
-from .node import Node
+from .node import ViSQOLNode
 from qualitymetrics.visqol.constants import PATCH_SIZE
 import qualitymetrics.visqol.dsp as dsp
 
-class PatchAlignmentNode(Node):
+
+class PatchAlignmentNode(ViSQOLNode):
     
-    def __init__(self, id_, children, output_key=None, **kwargs):
-        super().__init__(id_, children, output_key)
+    def __init__(self, id_, children, output_key=None, draw_options=None, **kwargs):
+        super().__init__(id_, children, output_key, draw_options=draw_options)
         self.type_ = 'PatchAlignmentNode'
+        
         
     def execute(self, result, **kwargs):
         super().execute(result, **kwargs)

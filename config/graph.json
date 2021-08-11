@@ -1,15 +1,14 @@
 {
-    "root": {
-        "children": ["load_ref"],
-        "class": "IdentityNode",
-        "module": "identitynode"
-    },
     "load_ref": {
         "children": ["load_deg"],
         "class": "LoadSignalNode",
         "module": "loadsignalnode",
         "signal_path": "resources/reference/ref.wav",
-        "output_key": "reference_signal" 
+        "output_key": "reference_signal",
+        "draw_options": {
+            "shape": "oval",
+            "fillcolor": "#ff0000B3"
+        }
     },
     "load_deg": {
         "children": ["visqol_args"],
@@ -25,7 +24,7 @@
         "module": "visqolstructuresnode"
     },
     "channel_loop": {
-        "children": ["blank"],
+        "children": ["Graphing_Node", "LaTeX_Table_Node"],
         "output_key": "vnsims",
         "class": "LoopNode",
         "module": "loopnode",
@@ -89,12 +88,12 @@
             }
         }
     },
-    "blank": {
-        "children": ["blank_"],
+    "Graphing_Node": {
+        "children": [],
         "class": "IdentityNode",
         "module": "identitynode"
     },
-    "blank_": {
+    "LaTeX_Table_Node": {
         "children": [],
         "class": "IdentityNode",
         "module": "identitynode"
