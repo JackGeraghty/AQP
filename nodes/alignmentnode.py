@@ -23,6 +23,6 @@ class AlignmentNode(Node):
         elif deg_length > ref_length:
             aligned_reference_signal, aligned_degraded_signal=result[self.ref_sig_key][0], np.array(result[self.deg_sig_key].tolist()[:ref_length])
         
-        result['aligned_reference_signal']=aligned_reference_signal
-        result['aligned_degraded_signal']=aligned_degraded_signal
+        result[output_key]['aligned_reference_signal']=aligned_reference_signal
+        result[output_key]['aligned_degraded_signal']=aligned_degraded_signal
         return result
