@@ -9,85 +9,32 @@
         "class": "LoadSignalNode",
         "module": "loadsignalnode",
         "signal_path": "resources/reference/ref.wav",
-        "output_key": "reference_signal" 
+        "output_key": "reference_signal",
+        "target_sample_rate": 16000,
+        "mono": "true"
     },
     "load_deg": {
-        "children": ["visqol_args"],
+        "children": ["align_signals"],
         "class": "LoadSignalNode",
         "module": "loadsignalnode",
         "signal_path": "resources/degraded/deg.wav",
-        "output_key": "degraded_signal" 
+        "output_key": "degraded_signal",
+        "target_sample_rate": 16000,
+        "mono": "true"
     },
-    "visqol_args" : {
-        "output_key": "visqol_args",
-        "children": ["channel_loop"],
-        "class": "VisqolStructuresNode",
-        "module": "visqolstructuresnode"
+    "align_signals" : {
+        "output_key": "align_signals",
+        "children": ["py_pesq_score"],
+        "class": "AlignmentNode",
+        "module": "alignmentnode"
     },
-    "channel_loop": {
+    "py_pesq_score" : {
+        "output_key": "py_pesq_score",
         "children": ["blank"],
-        "output_key": "vnsims",
-        "class": "LoopNode",
-        "module": "loopnode",
-        "iterable_key": "active_channels",
-        "node_data": {
-            "children": [],
-            "sub_root_id": "extract_channels",
-            "class": "GraphNode",
-            "module": "graphnode",
-            "subgraph": {
-                "extract_channels": {
-                    "children": ["scale_signals"],
-                    "class": "VisqolChannelNode",
-                    "module": "visqolchannelnode"
-                },
-                "scale_signals": {
-                    "children": ["ref_spect"],
-                    "class": "ScaleSignalsNode",
-                    "module": "scalesignalsnode"
-                },
-                "ref_spect": {
-                    "children": ["deg_spect"],
-                    "output_key": "reference_spect",
-                    "class": "SpectrogramNode",
-                    "module": "spectrogramnode",
-                    "signal_key": "reference_signal"
-                },
-                "deg_spect": {
-                    "children": ["floor_spect"],
-                    "output_key": "degraded_spect",
-                    "class": "SpectrogramNode",
-                    "module": "spectrogramnode",
-                    "signal_key": "degraded_signal"
-                },
-                "floor_spect": {
-                    "children": ["reference_patches"],
-                    "output_key": null,
-                    "class": "FloorSpectrogramsNode",
-                    "module": "floorspectrogramsnode"
-                },
-                "reference_patches": {
-                    "children": ["vad"],
-                    "class": "ReferencePatchNode",
-                    "module": "referencepatchnode"
-                },
-                "vad": {
-                    "children": ["patch_alignment"],
-                    "class": "VADNode",
-                    "module": "vadnode"
-                },
-                "patch_alignment": {
-                    "children": ["patch_similarity"],
-                    "class": "PatchAlignmentNode",
-                    "module": "patchalignmentnode"
-                },
-                "patch_similarity": {
-                    "children": [],
-                    "class": "PatchSimilarityNode",
-                    "module": "patchsimilaritynode"
-                }
-            }
-        }
+        "class": "PypesqNode",
+        "module": "pypesqnode",
+        "target_sample_rate": 16000,
+        "pesq_mode": "wb"
     },
     "blank": {
         "children": ["blank_"],
