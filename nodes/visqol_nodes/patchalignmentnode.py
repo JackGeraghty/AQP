@@ -1,4 +1,4 @@
-from .node import ViSQOLNode
+from ..node import ViSQOLNode
 from qualitymetrics.visqol.constants import PATCH_SIZE
 import qualitymetrics.visqol.dsp as dsp
 

@@ -3,18 +3,14 @@
         "children": ["load_deg"],
         "class": "LoadSignalNode",
         "module": "loadsignalnode",
-        "signal_path": "resources/reference/ref.wav",
-        "output_key": "reference_signal",
-        "draw_options": {
-            "shape": "oval",
-            "fillcolor": "#ff0000B3"
-        }
+        "signal_path": "resources/Speech_Databases/TCDvoip/Test_Set/CHOP/ref/R_15_CHOP_FA.wav",
+        "output_key": "reference_signal"
     },
     "load_deg": {
         "children": ["visqol_args"],
         "class": "LoadSignalNode",
         "module": "loadsignalnode",
-        "signal_path": "resources/degraded/deg.wav",
+        "signal_path": "resources/Speech_Databases/TCDvoip/Test_Set/CHOP/C_15_CHOP_FA.wav",
         "output_key": "degraded_signal" 
     },
     "visqol_args" : {

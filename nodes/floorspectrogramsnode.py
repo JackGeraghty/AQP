@@ -4,7 +4,7 @@ from .node import ViSQOLNode
 
 class FloorSpectrogramsNode(ViSQOLNode):
     
-    def __init__(self, id_: int, children: list, output_key: str,
+    def __init__(self, id_: int, children: list, output_key: str=None,
                  reference_signal_key: str = 'reference_signal',
                  degraded_signal_key: str='degraded_signal', 
                  reference_spect_key: str='reference_spect',

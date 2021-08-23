@@ -44,15 +44,6 @@ def main() -> None:
     return
 
 
-def build_graph_from_list(input_list):
-    graph = nx.DiGraph()
-    for node in input_list:
-        graph.add_node(node)
-
-    graph.add_edges_from([(input_list[i], input_list[i+1]) for i in range(len(input_list)-1)])
-    return graph
-
-
 def load_graph_from_file(path_to_graph_config: str) -> nx.DiGraph:
     '''
     Builds the call_graph from the graph configuration file given to the 

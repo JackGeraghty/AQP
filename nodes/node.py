@@ -2,7 +2,13 @@ import importlib
 import logging
 import drawoptions as dopt
 
+from pathlib import Path
+
 LOGGER = logging.getLogger('pipeline')
+        
+    
+AVAILABLE_NODES = {path.name[:-len('.py')].lower():str(path)[:-len('.py')].lower().replace('/', '.') for path in Path('nodes/').rglob('*.py')}
+LOGGER.info("Available Nodes: %s", AVAILABLE_NODES)
 
 class Node(object):
     
@@ -33,7 +39,8 @@ class AQPNode(Node):
 
 
 def deserialize(data):
-    module_name = 'nodes.' + data['module']
-    class_ = getattr(importlib.import_module(module_name), data['class'])
+    type_ = data['type']
+    module = AVAILABLE_NODES[type_.lower()]
+    class_ = getattr(importlib.import_module(module), type_)
     return class_(**data)
 

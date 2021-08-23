@@ -109,7 +109,7 @@ def goertzel(signal: np.ndarray,
             p.join()
             
         spect_copy = np.copy(spect) ## need to copy, since the close and unlink operations destroy the original
-          
+        LOGGER.info("Finished processing spectrogram")
         # Tidy up the shared memory
         spect_shm.close()
         spect_shm.unlink()

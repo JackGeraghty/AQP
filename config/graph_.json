@@ -1,0 +1,113 @@
+{
+	"load_file_names": {
+		"children": ["convert_to_single_list"],
+		"output_key": "file_names",
+		"path_to": "resources/data.csv",
+		"column_names": ["Ref_Wave", "Test_Wave"],
+		"type": "LoadFileNamesNode"
+	},
+	"convert_to_single_list": {
+		"output_key": "file_names",
+		"children": ["file_names_loop"],
+		"type": "TransformNode",
+		"transform_name": "zip_lists_to_tuple",
+		"target_key": "file_names"
+	},
+	"file_names_loop": {
+		"output_key": "dataset_results",
+		"type": "LoopNode",
+		"iterable_key": "file_names",
+		"children": ["blank"],
+		"node_data": {
+			"children": [],
+			"sub_root_id": "transform_tuples",
+			"type": "GraphNode",
+			"subgraph": {
+				"transform_tuples": {
+					"children": ["load_ref"],
+					"type": "TupleTransformationNode",
+					"tuple_keys": ["reference", "degraded"],
+					"draw_options": {
+						"shape": "diamond",
+						"fillcolor": "#FFFF00"
+					}
+				},
+				"load_ref": {
+					"children": ["load_deg"],
+					"type": "LoadSignalNode",
+					"signal_key": "reference",
+					"output_key": "reference_signal"
+				},
+				"load_deg": {
+					"children": ["visqol_args"],
+					"type": "LoadSignalNode",
+					"signal_key": "degraded",
+					"output_key": "degraded_signal"
+				},
+				"visqol_args": {
+					"output_key": "visqol_args",
+					"children": ["channel_loop"],
+					"type": "VisqolStructuresNode"
+				},
+				"channel_loop": {
+					"children": [],
+					"output_key": "vnsims",
+					"type": "LoopNode",
+					"iterable_key": "active_channels",
+					"flatten_output": true,
+					"node_data": {
+						"children": [],
+						"sub_root_id": "extract_channels",
+						"type": "GraphNode",
+						"subgraph": {
+							"extract_channels": {
+								"children": ["scale_signals"],
+								"type": "VisqolChannelNode"
+							},
+							"scale_signals": {
+								"children": ["ref_spect"],
+								"type": "ScaleSignalsNode"
+							},
+							"ref_spect": {
+								"children": ["deg_spect"],
+								"output_key": "reference_spect",
+								"type": "SpectrogramNode",
+								"signal_key": "reference_signal"
+							},
+							"deg_spect": {
+								"children": ["floor_spect"],
+								"output_key": "degraded_spect",
+								"type": "SpectrogramNode",
+								"signal_key": "degraded_signal"
+							},
+							"floor_spect": {
+								"children": ["reference_patches"],
+								"type": "FloorSpectrogramsNode"
+							},
+							"reference_patches": {
+								"children": ["vad"],
+								"type": "ReferencePatchNode"
+							},
+							"vad": {
+								"children": ["patch_alignment"],
+								"type": "VADNode"
+							},
+							"patch_alignment": {
+								"children": ["patch_similarity"],
+								"type": "PatchAlignmentNode"
+							},
+							"patch_similarity": {
+								"children": [],
+								"type": "PatchSimilarityNode"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"blank": {
+		"children": [],
+		"type": "IdentityNode"
+	}
+}

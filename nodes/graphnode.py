@@ -1,6 +1,10 @@
 import networkx as nx
+import sys
+import logging
 from .node import AQPNode, deserialize
 from .loopnode import LoopNode
+
+LOGGER = logging.getLogger('pipeline')
 
 class GraphNode(AQPNode):
     
@@ -47,7 +51,12 @@ def build_traversal_dfs(graph: nx.DiGraph, traversal_list, node):
     
     '''
     traversal_list.append(node)
-    children = graph.nodes[node]['data'].children
+    try:
+        
+        children = graph.nodes[node]['data'].children
+    except KeyError:
+        print(node)
+        sys.exit(-1)
     for n in children:
         build_traversal_dfs(graph, traversal_list, n)
     return traversal_list
@@ -57,6 +66,7 @@ def build_graph(graph_definition: dict):
     edges = []
     graph = nx.DiGraph()
     for node in graph_definition:
+        LOGGER.debug("Attempting to create %s", node)
         graph_definition[node]['id_'] = node
         adjacent_nodes = graph_definition[node]['children']
         node_ = deserialize(graph_definition[node])

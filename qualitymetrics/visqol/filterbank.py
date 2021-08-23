@@ -50,7 +50,7 @@ class MelFilter(Filterbank):
 class GammatoneFilter(Filterbank):
     name : str = 'gammatone'
     band_flag : str = 'dynamic'
-    band_frequencies : np.array = field(default_factory=lambda: np.array())
+    band_frequencies : np.array = field(default_factory=lambda: [])
     low_frequency : int = 50
     high_frequency : int = 1600
     num_bands : int = 32

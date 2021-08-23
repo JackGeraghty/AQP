@@ -58,25 +58,34 @@ def setup_channel_configuration(reference_signal: np.ndarray,
     LOGGER.debug('Reference Signal Shape = %s', reference_signal.shape)
     LOGGER.debug('Degraded Signal Shape = %s', degraded_signal.shape)
 
-    threashold = 0.1
-    reference_signal_mid_energy = math.sqrt(np.mean(np.square((reference_signal.sum(axis=0) / 2))))
-    degraded_signal_mid_energy = math.sqrt(np.mean(np.square((degraded_signal.sum(axis=0) / 2))))
-    reference_signal_avg_energy = (math.sqrt(np.mean(np.square(reference_signal[0,:]))) + math.sqrt(np.mean(np.square(reference_signal[1,:])))) / 2
-    degraded_signal_avg_energy = (math.sqrt(np.mean(np.square(degraded_signal[0,:]))) + math.sqrt(np.mean(np.square(degraded_signal[1,:])))) / 2
-
-    if reference_signal_mid_energy < reference_signal_avg_energy * threashold or degraded_signal_mid_energy < degraded_signal_avg_energy * threashold:
+    if reference_signal.ndim == 1:
         channels = {
-            'left': True,
-            'right': True,
-            'mid': False,
+            'left': False,
+            'right': False,
+            'mid': True,
             'side': False
         }
-        return ChannelConfig(channels, channel_configuration.patch_function, channel_configuration.fvnsim_function)
-
-    channels = {
-        'left': False,
-        'right': False,
-        'mid': True,
-        'side': False
-    }
+    else:
+        threashold = 0.1
+        reference_signal_mid_energy = math.sqrt(np.mean(np.square((reference_signal.sum(axis=0) / 2))))
+        degraded_signal_mid_energy = math.sqrt(np.mean(np.square((degraded_signal.sum(axis=0) / 2))))
+        reference_signal_avg_energy = (math.sqrt(np.mean(np.square(reference_signal[0,:]))) + math.sqrt(np.mean(np.square(reference_signal[1,:])))) / 2
+        degraded_signal_avg_energy = (math.sqrt(np.mean(np.square(degraded_signal[0,:]))) + math.sqrt(np.mean(np.square(degraded_signal[1,:])))) / 2
+    
+        if reference_signal_mid_energy < reference_signal_avg_energy * threashold or degraded_signal_mid_energy < degraded_signal_avg_energy * threashold:
+            channels = {
+                'left': True,
+                'right': True,
+                'mid': False,
+                'side': False
+            }
+        else:
+            channels = {
+                'left': False,
+                'right': False,
+                'mid': True,
+                'side': False
+            }
     return ChannelConfig(channels, channel_configuration.patch_function, channel_configuration.fvnsim_function)
+
+        

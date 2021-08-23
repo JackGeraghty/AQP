@@ -6,7 +6,7 @@ class VisqolArguments():
     mosqol_mapper:str = 'nu-svr_radial'
     perform_mos_mapping: bool = True
     csv_output_path: str = None
-    compensate_for_padding: bool = True
+    compensate_for_padding: bool = False
     use_patch_alignment: bool = True
     speech: bool = False
     floor_spectrograms: bool = True

@@ -21,7 +21,7 @@ class LoadSignalNode(AQPNode):
         self.type_ = 'LoadSignalNode'
        
     
-    def execute(self, result) -> dict:
+    def execute(self, result, **kwargs) -> dict:
         super().execute(result)
         if self.signal_path:
             audio = self._load_audio_from_path(self.signal_path)
@@ -34,7 +34,12 @@ class LoadSignalNode(AQPNode):
     def _load_audio_from_path(self, path):
         converted_path = Path(path)
         try:
-            return load(converted_path, sr=self.target_sample_rate, mono=self.mono)[0]
+            audio = load(converted_path, sr=self.target_sample_rate, mono=self.mono)[0]
+            print(audio.shape)
+            if not self.mono and audio.ndim == 1:
+                audio = load(converted_path, sr=self.target_sample_rate, mono=True)[0]
+            
+            return audio
         except(FileNotFoundError) as err:
             LOGGER.error("%s", err)
             sys.exit(1)

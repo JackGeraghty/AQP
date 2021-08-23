@@ -33,6 +33,9 @@ def extract_channel(signal: np.ndarray, channel: str) -> np.ndarray:
             Subset of the origal signal data, containing only the data 
             relating to the specified channel
     """
+    if signal.ndim == 1:
+        return signal
+    
     if channel == 'left':
         return signal[0,:]
     elif channel == 'right':
@@ -480,9 +483,9 @@ def is_low_pass_filtered(patch_freq_band_mean_similarities: np.ndarray) -> bool:
 
 def count_contiguous_freq_above_threshold(freqs: np.ndarray, 
                                           threshold: float) -> int:
-    freqs_above_threshold = np.where(freqs > threshold)
+    # Pretty sure we expect freqs to always be a 1D array
+    freqs_above_threshold = np.where(freqs > threshold)[0]
     num_contiguous_freqs_above_threshold = 0
-    freqs_above_threshold = [each for each in freqs_above_threshold if each.size != 0]
     for freq_index in range(len(freqs_above_threshold)):
         if freqs_above_threshold[freq_index] > num_contiguous_freqs_above_threshold + 1:
             break
