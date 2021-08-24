@@ -40,6 +40,7 @@ class AQPNode(Node):
 
 def deserialize(data):
     type_ = data['type']
+    LOGGER.info("Creating %s", type_)
     module = AVAILABLE_NODES[type_.lower()]
     class_ = getattr(importlib.import_module(module), type_)
     return class_(**data)

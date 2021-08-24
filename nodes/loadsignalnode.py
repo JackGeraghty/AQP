@@ -8,12 +8,12 @@ LOGGER = logging.getLogger('pipeline')
 
 class LoadSignalNode(AQPNode):
     
-    def __init__(self, id_, children, output_key, signal_path=None, signal_key=None,
+    def __init__(self, id_, children, output_key, is_reference, signal_path=None, signal_key=None,
                  target_sample_rate: int=48000, mono: bool=False, draw_options=None, **kwargs):
         super().__init__(id_, children, output_key, draw_options=draw_options)
         if signal_path and signal_key:
             raise ValueError("Cannot set both signal_path and signal_key. Use only one")
-            
+        self.is_reference = is_reference
         self.signal_path = signal_path
         self.signal_key = signal_key
         self.target_sample_rate = target_sample_rate
@@ -23,10 +23,13 @@ class LoadSignalNode(AQPNode):
     
     def execute(self, result, **kwargs) -> dict:
         super().execute(result)
+        file_name_key = 'reference_file' if self.is_reference else 'degraded_file'
         if self.signal_path:
             audio = self._load_audio_from_path(self.signal_path)
+            result[file_name_key] = self.signal_path
         elif self.signal_key:
             audio = self._load_audio_from_path(result[self.signal_key])
+            result[file_name_key] = result[self.signal_key]
         result[self.output_key] = audio
         return result
     

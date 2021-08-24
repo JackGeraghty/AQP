@@ -33,13 +33,19 @@
 		                    "children": ["deg_spect"],
 		                    "output_key": "reference_spect",
 		                    "type": "SpectrogramNode",
-		                    "signal_key": "reference_signal"
+		                    "signal_key": "reference_signal",
+		                    "save_spectrogram": true,
+		                    "is_reference": true,
+		                    "output_dir": "spectrograms/mel/"
 		                },
 		                "deg_spect": {
 		                    "children": ["floor_spect"],
 		                    "output_key": "degraded_spect",
 		                    "type": "SpectrogramNode",
-		                    "signal_key": "degraded_signal"
+		                    "signal_key": "degraded_signal",
+                            "save_spectrogram": true,
+		                    "is_reference": false,
+		                    "output_dir": "spectrograms/mel/"
 		                },
 		                "floor_spect": {
 		                    "children": ["reference_patches"],

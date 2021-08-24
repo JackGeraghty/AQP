@@ -17,7 +17,6 @@ def main() -> None:
     parser = init_argparser()
     args = parser.parse_args()
     LOGGER.setLevel(logging.DEBUG if args.debug else logging.INFO)
-    #LOGGER.setLevel(logging.ERROR)
     if args.plot_call_graph and not args.graph_output_file:
         raise ValueError('If plotting call graph then the output file must also be specified')
         sys.exit(-1)
