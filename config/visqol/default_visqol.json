@@ -1,0 +1,68 @@
+{
+		"id_": "ViSQOL_DEFAULT",
+		"children": [],
+        "sub_root_id": "visqol_args",
+        "type": "GraphNode",
+        "subgraph": {
+			"visqol_args": {
+				"output_key": "visqol_args",
+				"children": ["channel_loop"],
+				"type": "VisqolStructuresNode"
+			},
+		    "channel_loop": {
+		        "children": [],
+		        "output_key": "vnsims",
+		        "type": "LoopNode",
+		        "iterable_key": "active_channels",
+		        "flatten_output": true,
+		        "node_data": {
+		            "children": [],
+		            "sub_root_id": "extract_channels",
+		            "type": "GraphNode",
+		           	"subgraph": {
+		                "extract_channels": {
+		                    "children": ["scale_signals"],
+		                    "type": "VisqolChannelNode"
+		                },
+		                "scale_signals": {
+		                    "children": ["ref_spect"],
+		                    "type": "ScaleSignalsNode"
+		                },
+		                "ref_spect": {
+		                    "children": ["deg_spect"],
+		                    "output_key": "reference_spect",
+		                    "type": "SpectrogramNode",
+		                    "signal_key": "reference_signal"
+		                },
+		                "deg_spect": {
+		                    "children": ["floor_spect"],
+		                    "output_key": "degraded_spect",
+		                    "type": "SpectrogramNode",
+		                    "signal_key": "degraded_signal"
+		                },
+		                "floor_spect": {
+		                    "children": ["reference_patches"],
+		                    "output_key": null,
+		                    "type": "FloorSpectrogramsNode"
+		                },
+		                "reference_patches": {
+		                    "children": ["vad"],
+		                    "type": "ReferencePatchNode"
+		                },
+		                "vad": {
+		                    "children": ["patch_alignment"],
+		                    "type": "VADNode"
+		                },
+		                "patch_alignment": {
+		                    "children": ["patch_similarity"],
+		                    "type": "PatchAlignmentNode"
+		                },
+		                "patch_similarity": {
+		                    "children": [],
+		                    "type": "PatchSimilarityNode"
+		                }
+		            }
+		        }
+		    }
+    }
+}

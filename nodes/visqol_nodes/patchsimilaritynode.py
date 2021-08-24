@@ -1,7 +1,7 @@
 import qualitymetrics.visqol.constants as constants
 import qualitymetrics.visqol.dsp as dsp
 import numpy as np
-from .node import ViSQOLNode
+from ..node import ViSQOLNode
 
 
 class PatchSimilarityNode(ViSQOLNode):

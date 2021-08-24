@@ -21,8 +21,8 @@ class GraphNode(AQPNode):
         for n_id in self.traversal_order:
             result = self.graph.nodes[n_id]['data'].execute(result, **kwargs)     
         return result
-    
-    
+
+        
 def build_traversal_dfs(graph: nx.DiGraph, traversal_list, node):
     '''
     Slightly modified depth first search(dfs). Difference being regular dfs 
@@ -51,8 +51,7 @@ def build_traversal_dfs(graph: nx.DiGraph, traversal_list, node):
     
     '''
     traversal_list.append(node)
-    try:
-        
+    try:        
         children = graph.nodes[node]['data'].children
     except KeyError:
         print(node)

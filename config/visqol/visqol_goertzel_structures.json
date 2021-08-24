@@ -1,0 +1,8 @@
+{
+	"analysis_window": {},
+	"filterbank": {
+    	"name": "goertzel"
+	},
+	"channel_config": {},
+	"program_arguments": {}
+}

@@ -1,5 +1,5 @@
 import qualitymetrics.visqol.dsp as dsp
-from .node import ViSQOLNode
+from ..node import ViSQOLNode
 
 
 class ReferencePatchNode(ViSQOLNode):

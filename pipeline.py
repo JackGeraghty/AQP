@@ -8,7 +8,7 @@ from pathlib import Path
 from nodes.graphnode import build_graph, build_traversal_dfs, expand_graph
 from networkx.drawing.nx_pydot import write_dot
 
-VERSION = '0.5'
+VERSION = '0.6'
 logging.basicConfig(format='%(asctime)s, %(levelname)s %(message)s', datefmt='%H:%M:%S')
 LOGGER = logging.getLogger('pipeline')
 
@@ -17,6 +17,7 @@ def main() -> None:
     parser = init_argparser()
     args = parser.parse_args()
     LOGGER.setLevel(logging.DEBUG if args.debug else logging.INFO)
+    #LOGGER.setLevel(logging.ERROR)
     if args.plot_call_graph and not args.graph_output_file:
         raise ValueError('If plotting call graph then the output file must also be specified')
         sys.exit(-1)
@@ -25,6 +26,10 @@ def main() -> None:
     result = {}
     
     traversal_order = build_traversal_dfs(call_graph, [], args.root_node_id)
+    print(traversal_order)
+    traversal_order = reorder_traversal(traversal_order)
+    print(traversal_order)
+
     LOGGER.debug("Pipeline Traversal Order: %s", traversal_order)    
     
     if args.plot_call_graph:
@@ -42,6 +47,18 @@ def main() -> None:
         result = call_graph.nodes[n_id]['data'].execute(result)
     
     return
+
+def reorder_traversal(traversal_order):
+    output = []
+    occurence_set = set()
+        
+    for i in range(len(traversal_order)-1, -1, -1):
+        if traversal_order[i] not in occurence_set:
+            output.append(traversal_order[i])
+            occurence_set.add(traversal_order[i])
+        
+    output.reverse()
+    return output
 
 
 def load_graph_from_file(path_to_graph_config: str) -> nx.DiGraph:

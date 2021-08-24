@@ -19,6 +19,7 @@ class ScaleSignalsNode(ViSQOLNode):
         super().execute(result)
         required_reference_spl = ScaleSignalsNode.calculate_SPL(result[self.ref_sig_key])
         required_degraded_spl = ScaleSignalsNode.calculate_SPL(result[self.deg_sig_key])
+        print(f'Reference: {required_reference_spl}, Degraded: {required_degraded_spl}')
         result[self.deg_sig_key] *= (10 ** ((required_reference_spl - required_degraded_spl) / 20))
         return result
     

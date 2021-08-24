@@ -1,6 +1,6 @@
 import logging
 import qualitymetrics.visqol.constants as constants
-from .node import ViSQOLNode
+from ..node import ViSQOLNode
 from pathlib import Path
 from json import load
 from qualitymetrics.visqol.analysiswindow import AnalysisWindow

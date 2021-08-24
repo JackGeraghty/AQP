@@ -6,7 +6,7 @@ from pathlib import Path
 
 LOGGER = logging.getLogger('pipeline')
         
-    
+
 AVAILABLE_NODES = {path.name[:-len('.py')].lower():str(path)[:-len('.py')].lower().replace('/', '.') for path in Path('nodes/').rglob('*.py')}
 LOGGER.info("Available Nodes: %s", AVAILABLE_NODES)
 

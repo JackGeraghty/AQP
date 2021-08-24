@@ -1,7 +1,6 @@
 import qualitymetrics.visqol.spectrograms.spectrogram as spectrogram
 from .node import ViSQOLNode
 
-
 class SpectrogramNode(ViSQOLNode):
     
     def __init__(self, id_, children, output_key, signal_key,  draw_options=None, **kwargs):
