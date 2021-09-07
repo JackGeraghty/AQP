@@ -68,7 +68,7 @@
 				"start_node": "visqol_args",
 				"path_to_node_config": "config/visqol/graphs/default_visqol_gammatone.json"
 			},
-            "update_df_gammetone": {
+            "update_df_gammatone": {
         		"type": "TransformNode",
         		"transform_name": "update_df_by_active_channels",
         		"target_key": "dataframe",
@@ -82,7 +82,7 @@
 				"start_node": "visqol_args",
 				"path_to_node_config": "config/visqol/graphs/default_visqol_goertzel.json"
 			},
-            "update_df_gammetone": {
+            "update_df_goertzel": {
         		"type": "TransformNode",
         		"transform_name": "update_df_by_active_channels",
         		"target_key": "dataframe",

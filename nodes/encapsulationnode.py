@@ -20,7 +20,8 @@ class EncapsulationNode(AQPNode):
     visqol functionality to avoid having to declare the full config repeatedly.
     """
     
-    def __init__(self, id_: str, start_node: str, path_to_node_config: str,
+    def __init__(self, id_: str, start_node: str,
+                 node_data: dict=None, path_to_node_config: str=None,
                  draw_options: dict=None, **kwargs):
         """Initialize an EncapsulationNode.
 
@@ -28,17 +29,28 @@ class EncapsulationNode(AQPNode):
         ----------
         start_node : str
             The root node of the encapsulated graph.
+        node_data: dict
+            Dictionary containing the node definition to be encapsulated by 
+            this node. Cannot be set if path_to_config is set.
         path_to_node_config : str
             Path to the config file containing the full graph definition to use.
+            Cannot be set if node_data is set.
         """
         super().__init__(id_, draw_options=draw_options, **kwargs)
-        try:
-            with open(Path(path_to_node_config), 'rb') as data:
-                self.execution_node = graphutils.build_graph(json.load(data), start_node)
-        except (FileNotFoundError) as err:
-            LOGGER.error(err)
-            sys.exit(-1)
+        if (node_data and path_to_node_config) or (node_data is None and path_to_node_config is None):
+            raise ValueError('One of node_data or path_to_node_config must be set. Not neither and not both.')
+            sys.exit(-2)
+            
+        if path_to_node_config:  
+            try:
+                with open(Path(path_to_node_config), 'rb') as data:
+                    node_data = json.load(data)
+            except (FileNotFoundError) as err:
+                LOGGER.error(err)
+                sys.exit(-1)
+        self.execution_node = graphutils.build_graph(node_data, start_node)
         self.type_ = 'EncapsulationNode'
+
 
     def execute(self, result: dict, **kwargs):
         """Execute each node in the encapsulated graph.

@@ -4,22 +4,20 @@
 		"type": "LoadSignalNode",
 		"signal_path": "resources/reference/ref.wav",
 		"file_name_key": "reference_file",
-		"output_key": "reference_signal",
-		"is_reference": true
+		"output_key": "reference_signal"
 	},
 	"load_deg": {
-		"children": ["ViSQOL_Mel", "ViSQOL_Gamma"],
+		"children": ["ViSQOL_Mel"],
 		"type": "LoadSignalNode",
 		"signal_path": "resources/degraded/deg.wav",
 		"file_name_key": "degraded_file",
-		"output_key": "degraded_signal",
-		"is_reference": false
+		"output_key": "degraded_signal"
 	},
 	"ViSQOL_Mel": {
 		"children": ["output"],
 		"type": "EncapsulationNode",
 		"start_node": "visqol_args",
-		"path_to_node_config": "config/visqol/default_visqol_mel.json"
+		"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
 	},
     "output": {
         "type": "IdentityNode"
