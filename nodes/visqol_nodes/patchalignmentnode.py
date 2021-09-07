@@ -1,16 +1,25 @@
-from ..node import ViSQOLNode
-from qualitymetrics.visqol.constants import PATCH_SIZE
+"""Module containing the PatchAlignmentNode for ViSQOL."""
+
 import qualitymetrics.visqol.dsp as dsp
 
+from ..node import ViSQOLNode
+from qualitymetrics.visqol.constants import PATCH_SIZE
 
 class PatchAlignmentNode(ViSQOLNode):
+    """Contains logic for performing patch alignment of signals in ViSQOL."""    
     
-    def __init__(self, id_, children, output_key=None, draw_options=None, **kwargs):
-        super().__init__(id_, children, output_key, draw_options=draw_options)
+    def __init__(self, id_: str, output_key: str=None,
+                 draw_options: dict=None, **kwargs):
+        """Initialize a PatchAlignmentNode.
+        
+        TODO: Make more configurable.
+        """
+        super().__init__(id_, output_key=output_key, draw_options=draw_options, **kwargs)
         self.type_ = 'PatchAlignmentNode'
         
         
-    def execute(self, result, **kwargs):
+    def execute(self, result: dict, **kwargs):
+        """Execute the Node and determine how to align the reference and degraded signal spectrograms."""
         super().execute(result, **kwargs)
         max_alignment_offset = PATCH_SIZE
         degraded_spect = result['degraded_spect']

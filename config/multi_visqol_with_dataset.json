@@ -1,0 +1,98 @@
+{
+	"load_dataframe": {
+		"type": "LoadCSVAsDFNode",
+		"children": ["cols_to_tuple_transform"],
+		"output_key": "dataframe",
+		"path_to_csv": "resources/dataset.csv"
+	},
+	"cols_to_tuple_transform": {
+		"type": "TransformNode",
+		"children": ["dataset_loop"],
+		"transform_name": "df_columns_to_tuples",
+		"target_key": "dataframe",
+		"output_key": "wav_files",
+		"function_args": {
+			"col_one": "ref_wav",
+			"col_two": "deg_wav"
+		}
+	},
+	"dataset_loop": {
+		"type": "LoopNode",
+		"children": ["output"],
+		"output_key": "dataset_output",
+		"iterable_key": "wav_files",
+		"start_node": "tuple_to_top_level",
+		"key_blacklist": ["wav_files", "vnsims_gamma", "vnsims_mel"],
+		"node_data": {
+			"tuple_to_top_level": {
+				"type": "TransformNode",
+				"children": ["load_ref"],
+				"transform_name": "tuple_to_top_level",
+				"target_key": "iterator_item",
+				"function_args": {
+					"reference_file_key": "reference",
+					"degraded_file_key": "degraded"
+				}
+			},
+			"load_ref": {
+				"type": "LoadSignalNode",
+				"children": ["load_deg"],
+				"file_name_key": "reference_file",
+				"signal_key": "reference",
+				"output_key": "reference_signal"
+			},
+			"load_deg": {
+				"type": "LoadSignalNode",
+				"children": ["ViSQOL_Mel", "ViSQOL_Gammatone"],
+				"signal_key": "degraded",
+				"output_key": "degraded_signal",
+				"file_name_key": "degraded_file"
+			},
+			"ViSQOL_Mel": {
+				"type": "EncapsulationNode",
+				"children": ["update_df_mel"],
+				"start_node": "visqol_args",
+				"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
+			},
+            "update_df_mel": {
+        		"type": "TransformNode",
+        		"transform_name": "update_df_by_active_channels",
+        		"target_key": "dataframe",
+        		"function_args": {
+        			"key": "vnsims_mel.{}.vnsim"
+        		}
+        	},
+			"ViSQOL_Gammatone": {
+				"type": "EncapsulationNode",
+				"children": ["update_df_gammatone"],
+				"start_node": "visqol_args",
+				"path_to_node_config": "config/visqol/graphs/default_visqol_gammatone.json"
+			},
+            "update_df_gammetone": {
+        		"type": "TransformNode",
+        		"transform_name": "update_df_by_active_channels",
+        		"target_key": "dataframe",
+        		"function_args": {
+        			"key": "vnsims_gammatone.{}.vnsim"
+        		}
+        	},
+            "ViSQOL_Goertzel": {
+				"type": "EncapsulationNode",
+				"children": ["update_df_goertzel"],
+				"start_node": "visqol_args",
+				"path_to_node_config": "config/visqol/graphs/default_visqol_goertzel.json"
+			},
+            "update_df_gammetone": {
+        		"type": "TransformNode",
+        		"transform_name": "update_df_by_active_channels",
+        		"target_key": "dataframe",
+        		"function_args": {
+        			"key": "vnsims_goertzel.{}.vnsim"
+        		}
+        	}
+		}
+	},
+	"output": {
+		"type": "IdentityNode"
+	}
+}

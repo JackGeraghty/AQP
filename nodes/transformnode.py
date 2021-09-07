@@ -1,30 +1,152 @@
+"""Module containing the TransformNode, which is used to perform various transforms on the result data.
+
+These transform functions are relatively short and because of this are contained
+within this single TransformNode. 
+"""
+
+import sys
+import logging
+
 from .node import AQPNode
+from pipeline import LOGGER_NAME
 
-def zip_lists_to_tuple(file_names):
-    l_one = file_names[0]
-    l_two = file_names[1]
-    l = []
-    for i in range(len(l_one)):
-        l.append((l_one[i], l_two[i]))
-    return l
+LOGGER = logging.getLogger(LOGGER_NAME)
 
-functions = {
-        "zip_lists_to_tuple":  zip_lists_to_tuple
-    }
+def df_columns_to_tuples(result: dict, target_key: str, output_key: str,
+                         col_one: str, col_two: str, **kwargs):
+    """Take two columns from a Pandas dataframe stored in the result dict and create a single list of tuples of the two columns.
+
+    Parameters
+    ----------
+    result : dict
+        The results dictionary.
+    target_key : str
+        Dict key containing the dataframe to operate on.
+    output_key : str
+        The key to assign the resulting list to.
+    col_one : str
+        The name of the first column to use.
+    col_two : str
+        The name of the second column to use.
+
+    Returns
+    -------
+    None.
+
+    """
+    if not output_key:
+        LOGGER.error("Function requires output_key to operate")
+        sys.exit(-2)
+    if not target_key:
+        LOGGER.error("Function requires target_key to operate")
+        sys.exit(-2)
+    df = result[target_key]
+    result[output_key] = list(zip(df[col_one], df[col_two]))
+
+
+def tuple_to_top_level(result: dict, target_key: str, 
+                       reference_file_key: str='reference',
+                       degraded_file_key: str='degraded', **kwargs):
+    """
+    Convert a two-item tuple to two top-level dict fields.
+
+    Parameters
+    ----------
+    result : dict
+        The results dictionary.
+    target_key : str
+        Dict key containing the tuple.
+    reference_file_key : str, optional
+        Key to assign the first tuple value to. The default is 'reference'.
+    degraded_file_key : str, optional
+        Key to assign the second tuple value to. The default is 'degraded'.
+
+    Returns
+    -------
+    None.
+
+    """
+    file_names = result[target_key]
+    result[reference_file_key] = file_names[0]
+    result[degraded_file_key] = file_names[1]
+
+
+def update_df_by_active_channels(result: dict, target_key: str, 
+                                 key: str, col_name: str='ref_wav', 
+                                 file_name_key: str='reference_file', **kwargs):
+    """Update the dataframe being used based on the col_name and ref_file_name_key arguments, with the value stored at the key.
+
+    Parameters
+    ----------
+    result : dict
+        The results dictionary.
+    target_key : str
+        Key of the dataframe.
+    key : str
+        '.' separted template string used to represent the nested chain of keys
+        required to retrieve the desired value. e.g. vnsims_mel.{}.vnsim
+        NOTE: This functionality will be changed soon, when the full port is done.
+    col_name : str, optional
+        The name of the column to search for the value at file_name_key.
+        The default is 'ref_wav'.
+    file_name_key : str, optional
+        The key used to retrieve the file name that will be used to find the correct
+        index in the dataframe. The default is 'reference_file'.
+
+    Returns
+    -------
+    None.
+
+    """
+    df = result[target_key]
+    index = df.index[df[col_name] == result[file_name_key]]
+    for channel in result['active_channels']:
+        formatted_key = key.format(channel)
+        split_keys = formatted_key.split('.')
+        val = result[split_keys[0]]
+        for key in split_keys[1:]:
+            val = val[key]
+        col_name = f'{split_keys[-1]}_{channel}'
+        df.at[index, col_name] = val
+
+
+# Used to assign the correct functions during deserialization from JSON.
+FUNCTIONS = {
+    'df_columns_to_tuples':  df_columns_to_tuples,
+    'tuple_to_top_level': tuple_to_top_level,
+    'update_df_by_active_channels': update_df_by_active_channels
+}
 
 
 class TransformNode(AQPNode):
+    """Node which encapsulates some transform logic."""
     
-    def __init__(self, id_, children, output_key, transform_name, target_key, draw_options=None, **kwargs):
-        super().__init__(id_, children, output_key=output_key, draw_options=draw_options)
-        self.function = functions[transform_name]
+    def __init__(self, id_: str, transform_name: str, function_args: dict,
+                 target_key: str, output_key: str=None, 
+                 draw_options: dict=None, **kwargs):
+        super().__init__(id_, output_key=output_key, draw_options=draw_options)
+        self.function = FUNCTIONS[transform_name]
+        self.function_args = function_args
         self.target_key = target_key
-        self.type_ = "TransformNode"
-        
-        
-    def execute(self, result, **kwargs):
+        self.type_ = 'TransformNode'
+
+    def execute(self, result: dict, **kwargs):
+        """Execute the transform function stored by this node."""
         super().execute(result, **kwargs)
-        x = self.function(result[self.target_key])
-        result[self.output_key] = x
+        args = {**self.__dict__(), **self.function_args,  **kwargs,}
+        self.function(result, **args)
         return result
-    
+
+    def __dict__(self):
+        """Create a dict representation of the node.
+
+        Returns
+        -------
+        dict
+            Dict representation of the node.
+
+        """
+        return {
+                "output_key": self.output_key,
+                "target_key": self.target_key
+            }

@@ -1,16 +1,24 @@
+"""Module containing the VADNode, which is used to identify voice activity in a signal."""
+
 import pyvad
 import numpy as np
-from .node import ViSQOLNode
+
+from .node import AQPNode
 from qualitymetrics.visqol.constants import PATCH_SIZE
 
-class VADNode(ViSQOLNode):
+class VADNode(AQPNode):
+    """Node which identifies and drops patches of the input signal if there is voice activity."""
     
-    def __init__(self, id_, children, output_key=None, draw_options=None, **kwargs):
-        super().__init__(id_, children, output_key, draw_options=draw_options)
+    def __init__(self, id_: str, draw_options: dict=None, **kwargs):
+        super().__init__(id_, draw_options=draw_options)
         self.type_ = 'VADNode'
         
         
-    def execute(self, result, **kwargs):
+    def execute(self, result: dict, **kwargs):
+        """Execute the VADNode which assigns the updated signal back to the result dict.
+        
+        TODO: make it less dependent on visqol.
+        """
         super().execute(result, **kwargs)
         if result['visqol_args'].arguments.speech:
             reference_signal = result['reference_signal']

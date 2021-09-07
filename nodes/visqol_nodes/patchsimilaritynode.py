@@ -1,17 +1,26 @@
+"""Module containing the PatchSimilarityNode, which calculates the VNSIM score in ViSQOL."""
+
 import qualitymetrics.visqol.constants as constants
 import qualitymetrics.visqol.dsp as dsp
 import numpy as np
+
 from ..node import ViSQOLNode
 
-
 class PatchSimilarityNode(ViSQOLNode):
+    """Node which encapsulates the patch similarity calculations of ViSQOL."""
     
-    def __init__(self, id_, children, output_key=None, draw_options=None, **kwargs):
-        super().__init__(id_, children, output_key, draw_options=draw_options)
+    def __init__(self, id_: str, output_key: str='vnsim', 
+                 draw_options: dict=None, **kwargs):
+        """Initialize a PatchSimilarityNode.
+        
+        TODO: make more configurable. i.e. less dependent on hard-coded dict keys
+        """
+        super().__init__(id_, output_key=output_key, draw_options=draw_options, **kwargs)
         self.type_ = 'PatchSimilarityNode'
         
     
     def execute(self, result, **kwargs):
+        """Execute the node functionality and calculate the VNSIM score for the two signals."""
         super().execute(result, **kwargs)
         freq_band_sim = constants.FREQ_BAND_SIM_FUNCTIONS[result['visqol_args'].arguments.freq_band_sim_per_patch]
         reference_patches = result['reference_patches']
@@ -62,5 +71,5 @@ class PatchSimilarityNode(ViSQOLNode):
         sim_spect = []
         for i in range(len(similarity_maps)):
             sim_spect.append(similarity_maps[i])
-        result['vnsim'] = vnsim
+        result[self.output_key] = vnsim
         return result

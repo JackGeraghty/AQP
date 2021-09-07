@@ -1,35 +1,52 @@
-import json
+"""Module containing the EncapsulationNode. A node used to encapsulate a set of nodes."""
+
 import logging
 import sys
-from .node import AQPNode, deserialize
-from pathlib import Path
+import json
+import graphutils
 
-LOGGER = logging.getLogger('pipeline')
+from .node import AQPNode
+from pathlib import Path
+from pipeline import LOGGER_NAME
+
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 class EncapsulationNode(AQPNode):
+    """An EncapsulationNode is used to group a set of nodes together.
     
-    def __init__(self, id_, children, 
-                 path_to_node_config, output_key,blacklist=None,
-                 draw_options=None, **kwargs):
-        super().__init__(id_, children, output_key=output_key, draw_options=draw_options)
+    These nodes are then executed as a single operation. 
+    
+    Example: encapsulating most of the 
+    visqol functionality to avoid having to declare the full config repeatedly.
+    """
+    
+    def __init__(self, id_: str, start_node: str, path_to_node_config: str,
+                 draw_options: dict=None, **kwargs):
+        """Initialize an EncapsulationNode.
+
+        Parameters
+        ----------
+        start_node : str
+            The root node of the encapsulated graph.
+        path_to_node_config : str
+            Path to the config file containing the full graph definition to use.
+        """
+        super().__init__(id_, draw_options=draw_options, **kwargs)
         try:
             with open(Path(path_to_node_config), 'rb') as data:
-                self.node = deserialize(json.load(data))
+                self.execution_node = graphutils.build_graph(json.load(data), start_node)
         except (FileNotFoundError) as err:
-            LOGGER.warn("%s", err)
+            LOGGER.error(err)
             sys.exit(-1)
-            
-        if blacklist is None:
-            blacklist = []
-        
-        self.blacklist = blacklist
         self.type_ = 'EncapsulationNode'
+
+    def execute(self, result: dict, **kwargs):
+        """Execute each node in the encapsulated graph.
         
-    def execute(self, result, **kwargs):
+        Runs each node contained in the stored execution node. Starting with 
+        the execution_node and working it's way through the children of that 
+        node.
+        """
         super().execute(result, **kwargs)
-        ## Not really happy with this, but for now it works. Lots of work 
-        ## needed to clean up what information is passed down the graph. 
-        ## Currently a decent bit of duplication
-        r = {k: result[k] for k in result.keys() if k not in self.blacklist}
-        result[self.output_key] = self.node.execute(r, **kwargs)
+        graphutils.run_node(self.execution_node, result, **kwargs)
         return result
