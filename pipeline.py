@@ -36,7 +36,7 @@ from networkx.drawing.nx_pydot import write_dot
 
 LOGGER_NAME = 'pipeline'
 
-VERSION = '0.9'
+VERSION = '0.99'
 logging.basicConfig(
     format='%(asctime)s, %(levelname)s %(message)s', datefmt='%H:%M:%S')
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -54,7 +54,8 @@ def main() -> None:
 
     try:
         with open(Path(args.graph_config_path), 'rb') as data:
-            root_node = graphutils.build_graph(json.load(data), args.root_node_id)
+            nodes = graphutils.build_graph(json.load(data))
+            root_node = nodes[args.root_node_id]
     except FileNotFoundError as err:
         LOGGER.error(err)
         sys.exit(-1)
@@ -62,24 +63,26 @@ def main() -> None:
 
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
-        expanded_nx_graph= graphutils.build_nx_graph(root_node, [], nx_graph=nx.DiGraph(), recursive=True)
-        expanded_name = args.graph_output_file + '_expanded.dot'
+        #expanded_nx_graph= graphutils.build_nx_graph(root_node, [], nx_graph=nx.DiGraph(), recursive=True)
+        # expanded_name = args.graph_output_file + '_expanded.dot'
         if not os.path.exists(args.graph_output_file):
             os.makedirs(args.graph_output_file)
-        for node in expanded_nx_graph.nodes:
-            draw_options = expanded_nx_graph.nodes[node]['data'].draw_options
-            if draw_options:
-                expanded_nx_graph.nodes[node].update(draw_options)
+        # for node in expanded_nx_graph.nodes:
+        #     draw_options = expanded_nx_graph.nodes[node]['data'].draw_options
+        #     if draw_options:
+        #         expanded_nx_graph.nodes[node].update(draw_options)
         for node in nx_graph.nodes:
             draw_options = nx_graph.nodes[node]['data'].draw_options
             if draw_options:
                 nx_graph.nodes[node].update(draw_options)
-        write_dot(expanded_nx_graph, expanded_name)
+        # write_dot(expanded_nx_graph, expanded_name)
         write_dot(nx_graph, args.graph_output_file + '.dot')    
         LOGGER.info('Graphs written to .dot files')
 
     result = {}
+    LOGGER.info("Running pipeline...")
     graphutils.run_node(root_node, result)
+    LOGGER.info("Finished running pipeline.")
 
 
 def init_argparser() -> argparse.ArgumentParser:

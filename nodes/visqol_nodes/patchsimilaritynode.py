@@ -45,7 +45,7 @@ class PatchSimilarityNode(ViSQOLNode):
         patch_nsims = dsp.extract_best_nsim_per_patch(mean_warp_patch_nsims, num_patches)
         patch_freq_band_per_patch_similarities = dsp.calc_patch_freq_band_similarities(similarity_maps, freq_band_sim)
         # The FVNSIM is the similarity measure across frequency bands.
-        fvnsim = np.empty((len(patch_freq_band_per_patch_similarities), 1))
+        fvnsim = np.empty((len(patch_freq_band_per_patch_similarities)))
         fvnsim[:] = np.nan
         fn = constants.FREQ_BAND_SIM_FUNCTIONS[result['visqol_args'].arguments.freq_band_sim_aggregate]
         for i in range(len(patch_freq_band_per_patch_similarities)):
@@ -71,5 +71,6 @@ class PatchSimilarityNode(ViSQOLNode):
         sim_spect = []
         for i in range(len(similarity_maps)):
             sim_spect.append(similarity_maps[i])
-        result[self.output_key] = vnsim
+        key = self.output_key
+        result[key] = (vnsim, np.array(patch_nsims), fvnsim)
         return result

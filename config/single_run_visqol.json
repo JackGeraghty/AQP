@@ -17,14 +17,14 @@
         "output_key": "visqol_args",
         "children": ["channel_loop"],
         "type": "VisqolStructuresNode",
-        "config_file_path": "config/visqol/structures/default_visqol_mel_structures.json"
+        "config_file_path": "config/visqol/structures/default_visqol_gammatone_structures.json"
     },
     "channel_loop": {
         "children": ["output"],
-        "output_key": "vnsims_mel",
+        "output_key": "vnsims_gammatone",
         "type": "LoopNode",
         "iterable_key": "active_channels",
-        "key_blacklist": ["wav_files", "vnsims_mel"],
+        "key_blacklist": ["wav_files", "vnsims_gammatone"],
         "start_node": "extract_channels",
         "node_data": {
             "extract_channels": {
@@ -42,7 +42,7 @@
                 "signal_key": "reference_signal",
                 "file_name_key": "reference_file",
                 "save_spectrogram": true,
-                "output_dir": "spectrograms/mel/"
+                "output_dir": "spectrograms/gammatone/"
             },
             "deg_spect": {
                 "children": ["floor_spect"],
@@ -51,7 +51,7 @@
                 "signal_key": "degraded_signal",
                 "file_name_key": "degraded_file",
                 "save_spectrogram": true,
-                "output_dir": "spectrograms/mel/"
+                "output_dir": "spectrograms/gammatone/"
             },
             "floor_spect": {
                 "children": ["reference_patches"],
@@ -70,12 +70,20 @@
                 "type": "PatchAlignmentNode"
             },
             "patch_similarity": {
-                "children": [],
-                "type": "PatchSimilarityNode"
+                "type": "PatchSimilarityNode",
+                "children": ["mos_mapping"],
+                "output_key": "similarity_data"
+            },
+            "mos_mapping": {
+                "type": "MOSMapperNode",
+                "output_key": "mos",
+                "target_key": "similarity_data",
+                "visqol_args_key": "visqol_args"
             }
         }
     },
     "output": {
-        "type": "IdentityNode"
+        "type": "GraphMOSNode",
+        ""
     }
 }

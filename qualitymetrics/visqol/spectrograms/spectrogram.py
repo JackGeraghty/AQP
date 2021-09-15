@@ -68,7 +68,7 @@ def build_spectrogram(signal: np.ndarray, sample_rate: int, filterbank: Filterba
     spectrogram = np.abs(np.real(spect)) # Remove complex components
     spectrogram[spectrogram == 0.0] = np.finfo(float).eps # Replace any zero values with a very small float value
     spectrogram_bf = 10 * np.log10(spectrogram) # convert to power in dB
-    LOGGER.info('Spectrogram Shape=%s', spectrogram.shape)
+    LOGGER.debug('Spectrogram Shape=%s', spectrogram.shape)
     return spectrogram_bf, time_spaces
 
       
@@ -82,7 +82,6 @@ def build_specific_spectrogram(signal: np.ndarray,
     """
         Stil WIP
     """
-    LOGGER.info('Attempting to build %s spectrogram', filterbank.name)
     hop = round(time_spaces[1] - time_spaces[0], 4)
     if filterbank.name == 'mel':
         window_duration = round((1 / analysis_window.overlap) * hop,4)

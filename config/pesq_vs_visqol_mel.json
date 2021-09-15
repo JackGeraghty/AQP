@@ -1,5 +1,5 @@
 {
-	"load_dataframe": {
+	"load_dataset": {
 		"type": "LoadCSVAsDFNode",
 		"children": ["cols_to_tuple_transform"],
 		"output_key": "dataframe",
@@ -22,7 +22,7 @@
 		"output_key": "dataset_output",
 		"iterable_key": "wav_files",
 		"start_node": "tuple_to_top_level",
-		"key_blacklist": ["wav_files", "vnsims_gamma", "vnsims_mel"],
+		"key_blacklist": ["wav_files", "vnsims_gammatone"],
 		"node_data": {
 			"tuple_to_top_level": {
 				"type": "TransformNode",
@@ -37,86 +37,63 @@
 			"load_ref": {
 				"type": "LoadSignalNode",
 				"children": ["load_deg"],
+				"target_sample_rate": 16000,
 				"file_name_key": "reference_file",
 				"signal_key": "reference",
 				"output_key": "reference_signal"
 			},
 			"load_deg": {
 				"type": "LoadSignalNode",
-				"children": ["ViSQOL_Mel", "ViSQOL_Gammatone", "ViSQOL_Goertzel"],
+				"children": ["ViSQOL_Gamma", "pesq_alignment"],
+				"target_sample_rate": 16000,
 				"signal_key": "degraded",
 				"output_key": "degraded_signal",
 				"file_name_key": "degraded_file"
 			},
-			"ViSQOL_Mel": {
+			"ViSQOL_Gamma": {
 				"type": "EncapsulationNode",
-				"children": ["mos_mapping_mel"],
-				"start_node": "visqol_args",
-				"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
-			},
-			"mos_mapping_mel": {
-                "type": "MOSMapperNode",
-                "children": ["update_df_mel"],
-                "output_key": "mos_mel",
-                "target_key": "vnsims_mel.similarity_data",
-                "visqol_args_key": "visqol_args"
-            },
-            "update_df_mel": {
-        		"type": "TransformNode",
-        		"transform_name": "update_df",
-        		"target_key": "dataframe",
-        		"function_args": {
-        			"key": "mos_mel"
-        		}
-        	},
-			"ViSQOL_Gammatone": {
-				"type": "EncapsulationNode",
-				"children": ["mos_mapping_gamma"],
+				"children": ["mos_mapping"],
 				"start_node": "visqol_args",
 				"path_to_node_config": "config/visqol/graphs/default_visqol_gammatone.json"
 			},
-			"mos_mapping_gamma": {
+			"mos_mapping": {
                 "type": "MOSMapperNode",
-                "children": ["update_df_gammatone"],
-                "output_key": "mos_gammatone",
+                "children": ["update_df_gamma"],
+                "output_key": "visqol_gammatone",
                 "target_key": "vnsims_gammatone.similarity_data",
                 "visqol_args_key": "visqol_args"
             },
-            "update_df_gammatone": {
+            "update_df_gamma": {
         		"type": "TransformNode",
         		"transform_name": "update_df",
         		"target_key": "dataframe",
         		"function_args": {
-        			"key": "mos_gammatone"
+        			"key": "visqol_gammatone"
         		}
         	},
-        	"ViSQOL_Goertzel": {
-				"type": "EncapsulationNode",
-				"children": ["mos_mapping_goertzel"],
-				"start_node": "visqol_args",
-				"path_to_node_config": "config/visqol/graphs/default_visqol_goertzel.json"
-			},
-			"mos_mapping_goertzel": {
-                "type": "MOSMapperNode",
-                "children": ["update_df_goertzel"],
-                "output_key": "mos_goertzel",
-                "target_key": "vnsims_goertzel.similarity_data",
-                "visqol_args_key": "visqol_args"
-            },
-            "update_df_goertzel": {
-        		"type": "TransformNode",
-        		"transform_name": "update_df",
-        		"target_key": "dataframe",
-        		"function_args": {
-        			"key": "mos_goertzel"
-        		}
+        	"pesq_alignment": {
+                	"type": "AlignmentNode",
+                	"children": ["pesq"]
+        	},
+        	"pesq": {
+                	"type": "PyPESQNode",
+                	"children": ["update_df_pesq"],
+                	"output_key": "pesq"
+        	},
+        	"update_df_pesq": {
+                	"type": "TransformNode",
+                	"transform_name": "update_df",
+                	"target_key": "dataframe",
+                	"function_args": {
+                    	"key": "pesq"
+                	}
         	}
 		}
 	},
 	"GraphOutput": {
         "type": "GraphMOSNode",
 		"df_key": "dataframe",
-		"x_data_keys": ["mos_mel", "mos_gammatone", "mos_goertzel"],
+		"x_data_keys": ["visqol_gammatone", "pesq"],
 		"y_data_key": "sampleMOS",
 		"plot_title": "GenSpeech Sample MOS vs Predicted MOS",
 		"x_label": "Predicted MOS",

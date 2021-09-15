@@ -1,9 +1,9 @@
 """Module containing the AlignemntNode, responsible for ViSQOL alignment of reference + degraded patches."""
 
-from .node import ViSQOLNode
+from ..node import PESQNode
 import numpy as np
 
-class AlignmentNode(ViSQOLNode):
+class AlignmentNode(PESQNode):
     """The AlignmentNode is used to perform patch alignment of the reference and degraded signal patches."""
     
     def __init__(self, id_: str, output_key: str='align_signals',
@@ -40,6 +40,6 @@ class AlignmentNode(ViSQOLNode):
         else:
             aligned_reference_signal, aligned_degraded_signal=result[self.ref_sig_key], result[self.deg_sig_key]
         
-        signals = {'aligned_reference_signal': aligned_reference_signal, 'aligned_degraded_signal': aligned_degraded_signal}
-        result[self.output_key]=signals
+        result['aligned_ref_signal'] = aligned_reference_signal
+        result['aligned_deg_signal'] = aligned_degraded_signal
         return result

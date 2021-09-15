@@ -61,8 +61,12 @@ class Node(object):
         None.
 
         """
-        LOGGER.info(f'Executing node {self.id_} | type={self.type_}')
+        LOGGER.debug(f'Executing node {self.id_} | type={self.type_}')
 
+
+    def is_leaf(self):
+        """Check whether or not this node is a leaf node, i.e. no children."""
+        return len(self.children) == 0
 
 class AQPNode(Node):
     """Class for the core nodes of the pipeline, that should be reusable regardless of the quality metric being tested.

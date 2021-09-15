@@ -6,10 +6,10 @@
 		"config_file_path": "config/visqol/structures/default_visqol_gammatone_structures.json"
 	},
 	"channel_loop": {
-		"output_key": "vnsims_gamma",
+		"output_key": "vnsims_gammatone",
 		"type": "LoopNode",
 		"iterable_key": "active_channels",
-        "key_blacklist": ["wav_files", "vnsims_gamma", "vnsims_mel", "vnsims_goertzel"],
+		"key_blacklist": ["wav_files", "vnsims_gammatone", "vnsims_mel", "vnsims_goertzel"],
 		"start_node": "extract_channels",
 		"node_data": {
 			"extract_channels": {
@@ -26,7 +26,6 @@
 				"type": "SpectrogramNode",
 				"signal_key": "reference_signal",
 				"file_name_key": "reference_file",
-				"save_spectrogram": true,
 				"output_dir": "spectrograms/gammatone/"
 			},
 			"deg_spect": {
@@ -35,7 +34,6 @@
 				"type": "SpectrogramNode",
 				"signal_key": "degraded_signal",
 				"file_name_key": "degraded_file",
-				"save_spectrogram": true,
 				"output_dir": "spectrograms/gammatone/"
 			},
 			"floor_spect": {
@@ -55,8 +53,8 @@
 				"type": "PatchAlignmentNode"
 			},
 			"patch_similarity": {
-				"children": [],
-				"type": "PatchSimilarityNode"
+				"type": "PatchSimilarityNode",
+				"output_key": "similarity_data"
 			}
 		}
 	}

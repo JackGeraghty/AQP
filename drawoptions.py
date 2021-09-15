@@ -1,7 +1,7 @@
 """Module for handling the different draw options for nodes. Used when creating a .dot file respresentation of the pipeline."""
 
 _DEFAULT_DRAW_OPTIONS = {'shape': 'box', 'style': 'filled'}
-_DEFAULT_AQP_OPTIONS = {'fillcolor': '#008900B3'}
+_DEFAULT_AQP_OPTIONS = {'fillcolor': '#ffffff'}
 _DEFAULT_VISQOL_OPTIONS = {'fillcolor': '#6495EDB3'}
 _DEFAULT_PESQ_OPTIONS = {'fillcolor': '#DAA520B3'}
 

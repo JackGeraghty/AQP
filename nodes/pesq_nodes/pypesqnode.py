@@ -1,6 +1,6 @@
 """Module containing the PyPESQNode. Calculates the PESQ metric for the audio signals given."""
 
-from .node import PESQNode
+from ..node import PESQNode
 from pesq import pesq
 
 class PyPESQNode(PESQNode):
@@ -9,7 +9,7 @@ class PyPESQNode(PESQNode):
     def __init__(self, id_: str, output_key: str='py_pesq_score',
                  ref_signal_key: str='aligned_ref_signal', 
                  deg_signal_key: str='aligned_deg_signal',
-                 target_sample_rate: int=48000, pesq_mode:str='wb', 
+                 target_sample_rate: int=16000, pesq_mode:str='wb', 
                  draw_options: dict=None, **kwargs):
         """Initialize a PyPESQNode.
 

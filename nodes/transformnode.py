@@ -71,7 +71,7 @@ def tuple_to_top_level(result: dict, target_key: str,
     result[degraded_file_key] = file_names[1]
 
 
-def update_df_by_active_channels(result: dict, target_key: str, 
+def update_df(result: dict, target_key: str, 
                                  key: str, col_name: str='ref_wav', 
                                  file_name_key: str='reference_file', **kwargs):
     """Update the dataframe being used based on the col_name and ref_file_name_key arguments, with the value stored at the key.
@@ -84,7 +84,7 @@ def update_df_by_active_channels(result: dict, target_key: str,
         Key of the dataframe.
     key : str
         '.' separted template string used to represent the nested chain of keys
-        required to retrieve the desired value. e.g. vnsims_mel.{}.vnsim
+        required to retrieve the desired value. e.g. vnsims_mel.mos
         NOTE: This functionality will be changed soon, when the full port is done.
     col_name : str, optional
         The name of the column to search for the value at file_name_key.
@@ -100,21 +100,21 @@ def update_df_by_active_channels(result: dict, target_key: str,
     """
     df = result[target_key]
     index = df.index[df[col_name] == result[file_name_key]]
-    for channel in result['active_channels']:
-        formatted_key = key.format(channel)
-        split_keys = formatted_key.split('.')
-        val = result[split_keys[0]]
-        for key in split_keys[1:]:
-            val = val[key]
-        col_name = f'{split_keys[-1]}_{channel}'
-        df.at[index, col_name] = val
+    df.at[index, key] = result[key]
+    # for channel in result['active_channels']:
+    #     formatted_key = key.format(channel)
+    #     split_keys = formatted_key.split('.')
+    #     val = result[split_keys[0]]
+    #     for key in split_keys[1:]:
+    #         val = val[key]
+    #     df.at[index, split_keys[0]] = val
 
 
 # Used to assign the correct functions during deserialization from JSON.
 FUNCTIONS = {
     'df_columns_to_tuples':  df_columns_to_tuples,
     'tuple_to_top_level': tuple_to_top_level,
-    'update_df_by_active_channels': update_df_by_active_channels
+    'update_df': update_df
 }
 
 

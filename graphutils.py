@@ -15,10 +15,10 @@ LOGGER = logging.getLogger(pipeline.LOGGER_NAME)
 
 AVAILABLE_NODES = {path.name[:-len('.py')].lower(): str(path)[:-len('.py')].lower(
 ).replace('/', '.').replace('\\', '.') for path in Path('nodes/').rglob('*.py')}
-LOGGER.info("Available Nodes: %s", AVAILABLE_NODES)
+LOGGER.debug("Available Nodes: %s", AVAILABLE_NODES)
 
 
-def _deserialize(data: dict) -> Node:
+def _deserialize(data: dict, node_id: str) -> Node:
     """Deserialize a dictionary, loaded from a json file to a Node
     
     parameters
@@ -33,7 +33,7 @@ def _deserialize(data: dict) -> Node:
         Node deserialized from the dictionary definition.
     """
     type_ = data['type']
-    LOGGER.info("Creating %s", type_)
+    LOGGER.info("Creating %s", node_id)
     module = AVAILABLE_NODES[type_.lower()]
     class_ = getattr(importlib.import_module(module), type_)
     return class_(**data)
@@ -88,7 +88,7 @@ def run_node(node: Node, result: dict, **kwargs):
             stack.append(children[i])
 
 
-def build_graph(graph_definition: dict, root_node: str) -> Dict[Node, str]:
+def build_graph(graph_definition: dict) -> Dict[Node, str]:
     """
     Creates the graph using the provided graph definition. Does this by
     deserializing each node definition in the graph_definition. The children
@@ -103,26 +103,26 @@ def build_graph(graph_definition: dict, root_node: str) -> Dict[Node, str]:
     ----------
     graph_definition : dict
         JSON representation of the graph loaded from a config file.
-    
-    root_node: str
-        id of the root node of the graph. This will be the first node executed.
-        
+
     Returns
     -------
     nodes : dict
-        The root node of the graph. Every other node is then accessed via the
-        children of the current node being executed.
+        A dictionary containing all of the nodes
     """
     edges = {}
     nodes = {}
     for node_definition in graph_definition:
         graph_definition[node_definition]['id_'] = node_definition
-        nodes[node_definition] = _deserialize(graph_definition[node_definition])
+        nodes[node_definition] = _deserialize(graph_definition[node_definition], node_definition)
         edges[node_definition] = graph_definition[node_definition].get('children', [])
 
     for node_id in nodes:
         nodes[node_id].children = [nodes[n] for n in edges[node_id]]
-    return nodes[root_node]
+    return nodes
+
+
+def get_leaf_nodes(nodes):
+    return[nodes[node] for node in nodes if nodes[node].is_leaf() and not isinstance(nodes[node], LoopNode)]
 
 
 def build_nx_graph(node: Node, edge_list, nx_graph, recursive=False):
@@ -138,15 +138,14 @@ def build_nx_graph(node: Node, edge_list, nx_graph, recursive=False):
         for i in range(len(edges_to_rework)):
             edge_list.pop()
         
-        edge_list.append((node.id_, execution_node.id_))
-        build_nx_graph(execution_node, edge_list, nx_graph, recursive)
+        edge_list.append((node.id_, node.execution_node.id_))
+        build_nx_graph(node.execution_node, edge_list, nx_graph, recursive)
         
-        num_children_to_rework = len(nx_graph.nodes[edge_list[-1][0]]['data'].children)
-        num_children_to_rework = 1 if num_children_to_rework == 0 else num_children_to_rework
-        last_nodes = [(edge_list[-num_children_to_rework:])[i][1] for i in range(num_children_to_rework)]
-        for last_node in last_nodes:
+        leaf_nodes = get_leaf_nodes(node.nodes)
+
+        for last_node in leaf_nodes:
             for edge in edges_to_rework:
-                edge_list.append((last_node, edge[1]))    
+                edge_list.append((last_node.id_, edge[1]))    
                 
     nx_graph.add_node(node.id_, data=node)
     current_edges = [(node.id_, child_node.id_) for child_node in node.children]
@@ -154,10 +153,10 @@ def build_nx_graph(node: Node, edge_list, nx_graph, recursive=False):
     
     # Only do this logic if the full expanded graph is being built
     if recursive and isinstance(node, EncapsulationNode):
-        _handle_execution_node(node.execution_node, node.id_, current_edges, edge_list, nx_graph)
+        _handle_execution_node(node, node.id_, current_edges, edge_list, nx_graph)
 
     if isinstance(node, LoopNode):
-        _handle_execution_node(node.execution_node, node.id_, current_edges, edge_list, nx_graph)
+        _handle_execution_node(node.nodes, node.id_, current_edges, edge_list, nx_graph)
         
     for child_node in node.children:
         build_nx_graph(child_node, edge_list, nx_graph, recursive)

@@ -79,6 +79,6 @@ def _plot_spectrogram(spectrogram: np.ndarray, save_spectrogram: bool = False,
         if file_name is None:
             LOGGER.error('No file name given, using DEFAULT')
             file_name = 'DEFAULT'
-        LOGGER.info('Saving Spectrogram to %s', f'results/{file_name}.jpg')
+        LOGGER.debug('Saving Spectrogram to %s', f'results/{file_name}.jpg')
         plt.savefig(f'{file_name}.jpg')
     plt.show()

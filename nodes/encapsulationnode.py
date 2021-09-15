@@ -48,7 +48,8 @@ class EncapsulationNode(AQPNode):
             except (FileNotFoundError) as err:
                 LOGGER.error(err)
                 sys.exit(-1)
-        self.execution_node = graphutils.build_graph(node_data, start_node)
+        self.nodes = graphutils.build_graph(node_data)
+        self.execution_node = self.nodes[start_node]
         self.type_ = 'EncapsulationNode'
 
 
