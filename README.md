@@ -14,6 +14,24 @@ AQP is built using Python and it's fundamental data structure is a Directed Acyc
 
 Alongside the DAG, the idea of aex component-based system is used to form the functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
 
+## Running the Pipeline
+
+The pipeline takes several command-line arguments, not all of which are mandatory. There are two required arguments:
+
+- ``--root_node_id``: This is the name/key of the root node of the graph. This will be the first node executed and from there it's children will be executed and so on.
+- ``--graph_config_path``: Path to the graph definition to use. 
+
+The other options are:
+
+- ``--plot_graph``: Flag to create a diagram of the pipeline, default is False.
+- ``--graph_output_file``: Path to file to store the created diagram, do NOT include the file extension (this is done automatically), default is "results/graph". This gets expanded to, for example, "results/graph.dot".
+- ``--debug``: Enables debug logging.
+- ``--version``: Prints the version.
+
+### Example
+
+``python pipeline.py --root_node_id "load_ref" --graph_config_path "config/my_graph.json"``
+
 ## Node Abstract Class
 
 Nodes are used to encapsulate some unique logic/functionality, but there is common properties/functionality to all nodes. These are defined in the abstract Node class (found in nodes/node.py). 

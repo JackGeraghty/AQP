@@ -68,6 +68,7 @@ class Node(object):
         """Check whether or not this node is a leaf node, i.e. no children."""
         return len(self.children) == 0
 
+
 class AQPNode(Node):
     """Class for the core nodes of the pipeline, that should be reusable regardless of the quality metric being tested.
         
