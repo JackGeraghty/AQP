@@ -114,13 +114,6 @@
 		}
 	},
 	"GraphOutput": {
-        "type": "GraphMOSNode",
-		"df_key": "dataframe",
-		"x_data_keys": ["mos_mel", "mos_gammatone", "mos_goertzel"],
-		"y_data_key": "sampleMOS",
-		"plot_title": "GenSpeech Sample MOS vs Predicted MOS",
-		"x_label": "Predicted MOS",
-		"y_label": "Sample MOS",
-		"plot_type": "scatter"
+        "type": "IdentityNode"
 	}
 }

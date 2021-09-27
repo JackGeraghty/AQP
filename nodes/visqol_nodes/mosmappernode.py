@@ -61,7 +61,7 @@ class MOSMapperNode(ViSQOLNode):
         for d_key in dict_keys:
             similarity_data = get_from_dict(result, d_key)
             sim_data.append(similarity_data)
-        
+
         patch_function = result[self.visqol_args_key].channel_config.patch_function
         patch_data = [s_data[1] for s_data in sim_data]
         patch_scores = np.array(patch_data) if len(patch_data) > 1 else patch_function(np.array(patch_data))

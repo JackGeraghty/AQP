@@ -19,6 +19,14 @@
 		"start_node": "visqol_args",
 		"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
 	},
+     "mos_mapping": {
+        "type": "MOSMapperNode",
+        "children": ["output"],
+        "output_key": "mos",
+        "target_key": "vnsims_mel.similarity_data",
+        "visqol_args_key": "visqol_args"
+    },
+
     "output": {
         "type": "IdentityNode"
     }

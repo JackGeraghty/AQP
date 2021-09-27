@@ -1,9 +1,9 @@
 {
-	"load_dataset": {
+	"load_dataframe": {
 		"type": "LoadCSVAsDFNode",
 		"children": ["cols_to_tuple_transform"],
 		"output_key": "dataframe",
-		"path_to_csv": "resources/genspeech.csv"
+		"path_to_csv": "resources/dataset.csv"
 	},
 	"cols_to_tuple_transform": {
 		"type": "TransformNode",
@@ -91,13 +91,6 @@
 		}
 	},
 	"GraphOutput": {
-        "type": "GraphMOSNode",
-		"df_key": "dataframe",
-		"x_data_keys": ["visqol_gammatone", "pesq"],
-		"y_data_key": "sampleMOS",
-		"plot_title": "GenSpeech Sample MOS vs Predicted MOS",
-		"x_label": "Predicted MOS",
-		"y_label": "Sample MOS",
-		"plot_type": "scatter"
+        "type": "IdentityNode"
 	}
 }

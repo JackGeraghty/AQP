@@ -54,14 +54,7 @@
 			},
         	"patch_similarity": {
                 "type": "PatchSimilarityNode",
-                "output_key": "similarity_data",
-                "children": ["mos_mapping"]
-            },
-            "mos_mapping": {
-                "type": "MOSMapperNode",
-                "output_key": "mos_goertzel",
-                "target_key": "similarity_data",
-                "visqol_args_key": "visqol_args"
+                "output_key": "similarity_data"
             }
 		}
 	}
