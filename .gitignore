@@ -1,6 +1,5 @@
 /__pycache__
 /logs
-/resources
 /results
 
 .installed.cfg
@@ -16,4 +15,4 @@ lib64
 *.pyc
 *.pyo
 
-*.sh
+

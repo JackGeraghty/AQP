@@ -92,6 +92,7 @@ class ViSQOLNode(Node):
     def __init__(self, id_, output_key=None, draw_options=None, **kwargs):
         super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['ViSQOL'], draw_options))
         
+        
 class PESQNode(Node):
     """Class for the PESQ node(s) of the pipeline.
     
@@ -102,3 +103,15 @@ class PESQNode(Node):
     
     def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
         super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['PESQ'], draw_options))
+
+
+class WarpQNode(Node):
+    """Class for the WARP-Q node(s) of the pipeline.
+    
+    Only difference between this and the base Node class is this class 
+    contains specific drawing options for producing a graph. These options
+    are overridable and are just used to differentiate between nodes.
+    """
+    
+    def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
+        super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['WARP-Q'], draw_options))

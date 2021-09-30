@@ -1,0 +1,46 @@
+{
+    "load_ref": {
+		"children": ["load_deg"],
+		"type": "LoadSignalNode",
+		"target_sample_rate": 16000,
+		"signal_path": "resources/p239_021.wav",
+		"file_name_key": "reference_file",
+		"output_key": "reference_signal"
+	},
+	"load_deg": {
+		"children": ["add_sr"],
+		"type": "LoadSignalNode",
+		"target_sample_rate": 16000,
+		"signal_path": "resources/p239_021_opus.wav",
+		"file_name_key": "degraded_file",
+		"output_key": "degraded_signal"
+	},
+	"add_sr": {
+    	"type": "VariableNode",
+    	"children": ["vad"],
+    	"output_key": "sr",
+    	"variable_value": 16000
+	},
+	"vad": {
+    	"type": "WarpQVADNode",
+    	"children": ["mfcc"],
+    	"ref_sig_key": "reference_signal",
+    	"deg_sig_key": "degraded_signal"
+    },
+    "mfcc": {
+        "type": "MFCCNode",
+        "children": ["alignment"],
+        "ref_sig_key": "reference_signal",
+        "deg_sig_key": "degraded_signal"
+    },
+    "alignment": {
+        "type": "WarpQAlignmentNode",
+        "children": ["output"],
+        "output_key": "warp_q",
+        "mfcc_ref_key": "mfcc_ref",
+        "mfcc_coded_patch_key": "mfcc_coded_patch"
+    },
+    "output": {
+        "type": "IdentityNode"
+    }
+}
