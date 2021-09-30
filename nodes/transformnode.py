@@ -101,20 +101,22 @@ def update_df(result: dict, target_key: str,
     df = result[target_key]
     index = df.index[df[col_name] == result[file_name_key]]
     df.at[index, key] = result[key]
-    # for channel in result['active_channels']:
-    #     formatted_key = key.format(channel)
-    #     split_keys = formatted_key.split('.')
-    #     val = result[split_keys[0]]
-    #     for key in split_keys[1:]:
-    #         val = val[key]
-    #     df.at[index, split_keys[0]] = val
 
 
+def to_csv(result: dict, target_key: str, output_file_name: str, **kwargs):
+    data = result.get(target_key, None)
+    if data is None:
+        LOGGER.error("Can't find data to write to csv.")
+        return
+    data.to_csv(output_file_name)
+    
+    
 # Used to assign the correct functions during deserialization from JSON.
 FUNCTIONS = {
     'df_columns_to_tuples':  df_columns_to_tuples,
     'tuple_to_top_level': tuple_to_top_level,
-    'update_df': update_df
+    'update_df': update_df,
+    'to_csv':  to_csv
 }
 
 
