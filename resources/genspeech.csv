@@ -1,4 +1,4 @@
-ref_wav,deg_wav,sampleMOS
+Ref_Wave,Test_Wave,MOS
 Speech_Databases/Genspeech/LPCNet_listening_test/mfall/dir1/ref.wav,Speech_Databases/Genspeech/LPCNet_listening_test/mfall/dir1/lpcnq.wav,3.823139469
 Speech_Databases/Genspeech/LPCNet_listening_test/vec18/dir1/ref.wav,Speech_Databases/Genspeech/LPCNet_listening_test/vec18/dir1/lpcnq.wav,4.122819767
 Speech_Databases/Genspeech/LPCNet_listening_test/mfall/dir2/ref.wav,Speech_Databases/Genspeech/LPCNet_listening_test/mfall/dir2/lpcnq.wav,4.312159404

@@ -1,9 +1,9 @@
 import numpy as np
 import librosa
-from ..node import AQPNode
+from ..node import WarpQNode
 
 
-class WarpQAlignmentNode(AQPNode):
+class WarpQAlignmentNode(WarpQNode):
     
     def __init__(self, id_, mfcc_ref_key,
                  mfcc_coded_patch_key, sigma=np.array([[1,1],[3,2],[1,3]]), **kwargs):

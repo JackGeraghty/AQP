@@ -1,10 +1,10 @@
 import librosa, librosa.core, librosa.display
 import speechpy
 import numpy as np
-from ..node import AQPNode
+from ..node import WarpQNode
 from skimage.util.shape import view_as_windows
 
-class MFCCNode(AQPNode):
+class MFCCNode(WarpQNode):
     
     def __init__(self, id_, ref_sig_key, deg_sig_key,
                  n_mfcc=12, fmax=5000, patch_size=0.4,

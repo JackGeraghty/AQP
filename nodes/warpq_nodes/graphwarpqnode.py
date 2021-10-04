@@ -1,10 +1,10 @@
-from ..node import AQPNode
+from ..node import WarpQNode
 import seaborn as sns
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
 
-class GraphWarpQNode(AQPNode):
+class GraphWarpQNode(WarpQNode):
     
     def __init__(self, id_, df_key, x_key, y_key, **kwargs):
         super().__init__(id_, **kwargs)

@@ -2,13 +2,15 @@
 
 _DEFAULT_DRAW_OPTIONS = {'shape': 'box', 'style': 'filled'}
 _DEFAULT_AQP_OPTIONS = {'fillcolor': '#ffffff'}
-_DEFAULT_VISQOL_OPTIONS = {'fillcolor': '#6495EDB3'}
-_DEFAULT_PESQ_OPTIONS = {'fillcolor': '#DAA520B3'}
+_DEFAULT_VISQOL_OPTIONS = {'fillcolor': '#56b3e9B3'}
+_DEFAULT_PESQ_OPTIONS = {'fillcolor': '#009e74B3'}
+_DEFAULT_WARP_Q_OPTIONS = {'fillcolor': '#d55c00B3'}
 
 DRAW_OPTIONS = {
         "AQP": _DEFAULT_AQP_OPTIONS,
         "ViSQOL": _DEFAULT_VISQOL_OPTIONS,
-        "PESQ": _DEFAULT_PESQ_OPTIONS
+        "PESQ": _DEFAULT_PESQ_OPTIONS,
+        "WARP-Q": _DEFAULT_WARP_Q_OPTIONS
     }
 
 def create_full_options(default_options: dict=_DEFAULT_DRAW_OPTIONS,

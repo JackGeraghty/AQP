@@ -1,0 +1,19 @@
+{
+    		"vad": {
+				"type": "WarpQVADNode",
+				"children": ["mfcc"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
+			},
+			"mfcc": {
+				"type": "MFCCNode",
+				"children": ["alignment"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
+			},
+			"alignment": {
+				"type": "WarpQAlignmentNode",
+				"mfcc_ref_key": "mfcc_ref",
+				"mfcc_coded_patch_key": "mfcc_coded_patch"
+			}
+}

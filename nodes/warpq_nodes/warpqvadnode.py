@@ -1,8 +1,8 @@
-from ..node import AQPNode
+from ..node import WarpQNode
 
-from pyvad import vad, trim, split
+from pyvad import vad
 
-class WarpQVADNode(AQPNode):
+class WarpQVADNode(WarpQNode):
     
     def __init__(self, id_: str, ref_sig_key: str, deg_sig_key: str,
                  **kwargs):

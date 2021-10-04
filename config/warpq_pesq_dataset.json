@@ -1,0 +1,136 @@
+{
+	"load_dataframe": {
+		"type": "LoadCSVAsDFNode",
+		"children": ["cols_to_tuple_transform"],
+		"output_key": "dataframe",
+		"path_to_csv": "resources/genspeech.csv"
+	},
+	"cols_to_tuple_transform": {
+		"type": "TransformNode",
+		"children": ["add_sr"],
+		"transform_name": "df_columns_to_tuples",
+		"target_key": "dataframe",
+		"output_key": "wav_files",
+		"function_args": {
+			"col_one": "Ref_Wave",
+			"col_two": "Test_Wave"
+		}
+	},
+	"add_sr": {
+		"type": "VariableNode",
+		"children": ["dataset_loop"],
+		"output_key": "sr",
+		"variable_value": 16000
+	},
+	"dataset_loop": {
+		"type": "LoopNode",
+		"children": ["write_df_to_csv"],
+		"output_key": "dataset_output",
+		"iterable_key": "wav_files",
+		"start_node": "tuple_to_top_level",
+		"key_blacklist": [],
+		"node_data": {
+			"tuple_to_top_level": {
+				"type": "TransformNode",
+				"children": ["load_ref"],
+				"transform_name": "tuple_to_top_level",
+				"target_key": "iterator_item",
+				"function_args": {
+					"reference_file_key": "reference",
+					"degraded_file_key": "degraded"
+				}
+			},
+			"load_ref": {
+				"type": "LoadSignalNode",
+				"children": ["load_deg"],
+				"target_sample_rate": 16000,
+				"file_name_key": "reference_file",
+				"signal_key": "reference",
+				"output_key": "reference_signal"
+			},
+			"load_deg": {
+				"type": "LoadSignalNode",
+				"children": ["warp_q", "pesq"],
+				"target_sample_rate": 16000,
+				"signal_key": "degraded",
+				"output_key": "degraded_signal",
+				"file_name_key": "degraded_file"
+			},
+			"warp_q": {
+				"type": "EncapsulationNode",
+				"children": ["update_df_warpq"],
+				"start_node": "vad",
+				"path_to_node_config": "config/warpq/default_warpq.json",
+				"draw_options": {
+    				"fillcolor": "#56b3e9B3"
+				}
+			},
+			"update_df_warpq": {
+				"type": "TransformNode",
+				"transform_name": "update_df",
+				"target_key": "dataframe",
+				"function_args": {
+					"key": "warp_q",
+					"col_name": "Ref_Wave"
+				},
+				"draw_options": {
+    				"fillcolor": "#56b3e9B3"
+				}
+			},
+			"pesq": {
+				"type": "EncapsulationNode",
+				"children": ["update_df_pesq"],
+				"start_node": "pesq_alignment",
+				"node_data": {
+					"pesq_alignment": {
+						"type": "AlignmentNode",
+						"children": ["pesq_"]
+					},
+					"pesq_": {
+						"type": "PyPESQNode",
+						"output_key": "pesq"
+					}
+				},
+                "draw_options": {
+    				"fillcolor": "#009e74B3"
+				}
+			},
+			"update_df_pesq": {
+				"type": "TransformNode",
+				"transform_name": "update_df",
+				"target_key": "dataframe",
+				"function_args": {
+					"key": "pesq",
+					"col_name": "Ref_Wave"
+				},
+                "draw_options": {
+    				"fillcolor": "#009e74B3"
+				}
+			}
+		}
+	},
+	"write_df_to_csv": {
+		"type": "TransformNode",
+		"children": ["graph_output"],
+		"transform_name": "to_csv",
+		"target_key": "dataframe",
+		"function_args": {
+			"output_file_name": "results/RESULTS.csv"
+		}
+	},
+	"graph_output": {
+		"type": "GraphNode",
+		"children": ["create_table"],
+		"df_key": "dataframe",
+		"x_data_keys": ["warp_q", "pesq"],
+		"y_data_key": "MOS",
+		"labels": ["WARP-Q", "PESQ"]
+	},
+	"create_table": {
+    	"type": "CorrelationTableNode",
+    	"df_key": "dataframe",
+    	"col_keys": ["warp_q", "pesq"],
+    	"mos_col_name": "MOS",
+    	"output_file": "results/genspeech_latex_table.txt"
+	}
+}
