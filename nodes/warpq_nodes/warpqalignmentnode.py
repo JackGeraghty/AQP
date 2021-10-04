@@ -5,9 +5,9 @@ from ..node import WarpQNode
 
 class WarpQAlignmentNode(WarpQNode):
     
-    def __init__(self, id_, mfcc_ref_key,
+    def __init__(self, id_, output_key, mfcc_ref_key,
                  mfcc_coded_patch_key, sigma=np.array([[1,1],[3,2],[1,3]]), **kwargs):
-        super().__init__(id_, **kwargs)
+        super().__init__(id_, output_key=output_key, **kwargs)
         self.mfcc_ref_key = mfcc_ref_key
         self.mfcc_coded_patch_key = mfcc_coded_patch_key
         self.sigma = sigma
@@ -28,5 +28,5 @@ class WarpQAlignmentNode(WarpQNode):
             b_ast = P_librosa[-1, 1]
             acc.append(D[-1, b_ast]/D.shape[0])
         
-        result['warp_q'] = np.median(acc)
+        result[self.output_key] = np.median(acc)
         return result

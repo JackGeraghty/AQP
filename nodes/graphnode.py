@@ -16,11 +16,12 @@ class GraphNode(AQPNode):
         super().execute(result, **kwargs)
         df = result[self.df_key]
         y_data = df[self.y_data_key]
+        colors = ['red', 'green', 'blue']
         i = 0
         plt.xlabel('MOS')
         plt.ylabel('Predicted MOS')
         for key in self.x_data_keys:
-            plt.scatter(y_data, df[key], label=self.labels[i])
+            plt.scatter(y_data, df[key], label=self.labels[i], color=colors[i])
             i += 1
         plt.legend()
         plt.show()
