@@ -36,6 +36,7 @@
     "alignment": {
         "type": "WarpQAlignmentNode",
         "children": ["output"],
+        "output_key": "warp_q"
         "mfcc_ref_key": "mfcc_ref",
         "mfcc_coded_patch_key": "mfcc_coded_patch"
     },
