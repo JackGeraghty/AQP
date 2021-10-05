@@ -1,0 +1,9 @@
+Ref_Wave,Test_Wave,MOS,Codec
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_evs.wav,3.54,evs
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_flow_embedding.wav,3.51,flow_embedding
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_flow_mel.wav,3.96,flow_mel
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_lpcn.wav,3.28,lpcn
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_lpcnq.wav,2.84,lpcnq
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_lyra.wav,3.78,lyra
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_melgan.wav,3.84,melgan
+Speech_Databases/audio/p239_021.wav,Speech_Databases/audio/p239_021_opus.wav,2.36,opus
