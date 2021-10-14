@@ -63,7 +63,7 @@
 				"deg_sig_key": "degraded_signal"
 			},
 			"mfcc": {
-				"type": "MFCCNode",
+				"type": "MelNode",
 				"children": ["alignment"],
 				"ref_sig_key": "reference_signal",
 				"deg_sig_key": "degraded_signal"

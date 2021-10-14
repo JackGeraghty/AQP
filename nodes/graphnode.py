@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib
 
 from .node import AQPNode
 
@@ -17,12 +18,20 @@ class GraphNode(AQPNode):
         df = result[self.df_key]
         y_data = df[self.y_data_key]
         colors = ['red', 'green', 'blue']
-        i = 0
-        plt.xlabel('MOS')
-        plt.ylabel('Predicted MOS')
-        for key in self.x_data_keys:
-            plt.scatter(y_data, df[key], label=self.labels[i], color=colors[i])
-            i += 1
-        plt.legend()
-        plt.show()
+        metric_names = ['WARP-Q Mel', 'WARP-Q MFCC', 'PESQ']
+        ylabel = ['WARP-Q Distance', 'WARP-Q Distance', 'Predicted MOS']
+        plt.rcParams['axes.labelsize'] = 17
+        matplotlib.rc('xtick', labelsize=15) 
+        matplotlib.rc('ytick', labelsize=15) 
+        fig, axs = plt.subplots(1, 3, sharey=False, sharex=True, figsize=(12, 12))
+        for i, key in enumerate(self.x_data_keys):
+            axs[i].scatter(y_data, df[key], label=self.labels[i], color=colors[i])
+            axs[i].set_title(metric_names[i], fontsize=17)
+            axs[i].set(xlabel='MOS', ylabel=ylabel[i])
+            axs[i].grid()
+            axs[i].set_xlim([1, 5])
+            axs[i].set_aspect(1./axs[i].get_data_ratio(), adjustable='box')
+        
+        plt.tight_layout()
+        plt.show() 
         return result

@@ -1,7 +1,7 @@
 librosa==0.8.*
 matplotlib==3.4.*
-networkx=2.5.*
-numpy=1.19.*
+networkx==2.5.*
+numpy==1.19.*
 pandas==1.2.*
 pesq==0.0.3
 pydot==1.4.*

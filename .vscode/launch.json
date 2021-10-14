@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Single Run ViSQOL",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/pipeline.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--root_node_id", "Load DF",
+                "--graph_config_path", "config/warpq_pesq_dataset.json",
+                "--plot_graph"
+            ]
+        }
+    ]
+}

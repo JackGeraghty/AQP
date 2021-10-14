@@ -1,0 +1,19 @@
+{
+    "load_ref_signal": {
+        "type": "LoadSignalNode",
+        "children": ["load_deg_signal"],
+        "output_key": "reference_signal",
+        "signal_path": "resources/reference/ref.wav",
+        "file_name_key": "reference_file"
+    },
+    "load_deg_signal": {
+        "type": "LoadSignalNode",
+        "children": ["scale_signal"],
+        "output_key": "degraded_signal",
+        "signal_path": "resources/degraded/deg.wav",
+        "file_name_key": "degraded_file"
+    },
+    "scale_signal": {
+        "type": "ScaleSignalsNode"
+    }
+}

@@ -21,7 +21,7 @@ class GraphWarpQNode(WarpQNode):
         pearson_coef, p_value = pearsonr(df[self.x_key], df[self.y_key])
         Spearmanr_coef, p_spearman = spearmanr(df[self.x_key], df[self.y_key])                                  
         
-        #plt.figure()           
+        #plt.figure()               
         sns.relplot(x="MOS", y="warp_q", 
                     hue="Codec", palette="muted",
                     data=df).fig.suptitle(
