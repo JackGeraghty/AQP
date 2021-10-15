@@ -6,6 +6,7 @@ within this single TransformNode.
 
 import sys
 import logging
+import pathlib
 
 from .node import AQPNode
 from pipeline import LOGGER_NAME
@@ -108,6 +109,8 @@ def to_csv(result: dict, target_key: str, output_file_name: str, **kwargs):
     if data is None:
         LOGGER.error("Can't find data to write to csv.")
         return
+    path_to_output_file = output_file_name[:output_file_name.rindex('/') + 1]
+    pathlib.Path(path_to_output_file).mkdir(parents=True, exist_ok=True)
     data.to_csv(output_file_name)
     
     

@@ -2,6 +2,11 @@
 /logs
 /results
 
+!/resources/reference
+!/resources/degraded
+
+resources/*
+
 .installed.cfg
 bin
 develop-eggs

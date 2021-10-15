@@ -11,7 +11,7 @@ class WarpQSDTWNode(WarpQNode):
         self.mfcc_ref_key = mfcc_ref_key
         self.mfcc_coded_patch_key = mfcc_coded_patch_key
         self.sigma = sigma
-        self.type_ = 'WarpQAlignmentNode'
+        self.type_ = 'WarpQSDTWNode'
         
     def execute(self, result, **kwargs):
         super().execute(result, **kwargs)

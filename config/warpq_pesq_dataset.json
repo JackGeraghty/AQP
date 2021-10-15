@@ -3,7 +3,7 @@
 		"type": "LoadCSVAsDFNode",
 		"children": ["Wrangle Data"],
 		"output_key": "dataframe",
-		"path_to_csv": "resources/warpq.csv"
+		"path_to_csv": "resources/genspeech.csv"
 	},
 	"Wrangle Data": {
 		"type": "TransformNode",
@@ -75,14 +75,14 @@
 				"deg_sig_key": "degraded_signal"
 			},
 			"Mel SDTW": {
-				"type": "WarpQAlignmentNode",
+				"type": "WarpQSDTWNode",
 				"children": ["Update DF Mel"],
 				"output_key": "warp_q_mel",
 				"mfcc_ref_key": "mfcc_ref",
 				"mfcc_coded_patch_key": "mfcc_coded_patch"
 			},
 			"MFCC SDTW": {
-				"type": "WarpQAlignmentNode",
+				"type": "WarpQSDTWNode",
 				"children": ["Update DF MFCC"],
 				"output_key": "warp_q_mfcc",
 				"mfcc_ref_key": "mfcc_ref",
