@@ -63,19 +63,12 @@ def main() -> None:
 
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
-        #expanded_nx_graph= graphutils.build_nx_graph(root_node, [], nx_graph=nx.DiGraph(), recursive=True)
-        # expanded_name = args.graph_output_file + '_expanded.dot'
         if not os.path.exists(args.graph_output_file):
             os.makedirs(args.graph_output_file)
-        # for node in expanded_nx_graph.nodes:
-        #     draw_options = expanded_nx_graph.nodes[node]['data'].draw_options
-        #     if draw_options:
-        #         expanded_nx_graph.nodes[node].update(draw_options)
         for node in nx_graph.nodes:
             draw_options = nx_graph.nodes[node]['data'].draw_options
             if draw_options:
                 nx_graph.nodes[node].update(draw_options)
-        # write_dot(expanded_nx_graph, expanded_name)
         write_dot(nx_graph, args.graph_output_file + '.dot')    
         LOGGER.info('Graphs written to .dot files')
 

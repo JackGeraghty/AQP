@@ -3,7 +3,7 @@
 		"type": "LoadCSVAsDFNode",
 		"children": ["cols_to_tuple_transform"],
 		"output_key": "dataframe",
-		"path_to_csv": "resources/warpq.csv"
+		"path_to_csv": "resources/genspeech.csv"
 	},
 	"cols_to_tuple_transform": {
 		"type": "TransformNode",
@@ -64,12 +64,12 @@
 			},
 			"mfcc": {
 				"type": "MFCCNode",
-				"children": ["alignment"],
+				"children": ["sdtw"],
 				"ref_sig_key": "reference_signal",
 				"deg_sig_key": "degraded_signal"
 			},
-			"alignment": {
-				"type": "WarpQAlignmentNode",
+			"sdtw": {
+				"type": "WarpQSDTWNode",
 				"children": ["update_df"],
 				"output_key": "warp_q",
 				"mfcc_ref_key": "mfcc_ref",
@@ -96,9 +96,11 @@
 		}
 	},
 	"GraphOutput": {
-		"type": "GraphWarpQNode",
+		"type": "GraphNode",
 		"df_key": "dataframe",
-		"x_key": "warp_q",
-		"y_key": "MOS"
+		"x_data_key": "MOS",
+		"y_data_keys": ["warp_q"],
+		"y_labels": ["WARP-Q Distance"],
+		"titles": ["WARP-Q"]
 	}
 }

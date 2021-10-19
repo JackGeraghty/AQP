@@ -3,7 +3,7 @@
 		"children": ["load_deg"],
 		"type": "LoadSignalNode",
 		"target_sample_rate": 16000,
-		"signal_path": "resources/p239_021.wav",
+		"signal_path": "resources/reference/ref.wav",
 		"file_name_key": "reference_file",
 		"output_key": "reference_signal"
 	},
@@ -11,7 +11,7 @@
 		"children": ["add_sr"],
 		"type": "LoadSignalNode",
 		"target_sample_rate": 16000,
-		"signal_path": "resources/p239_021_opus.wav",
+		"signal_path": "resources/test/test.wav",
 		"file_name_key": "degraded_file",
 		"output_key": "degraded_signal"
 	},
@@ -29,12 +29,12 @@
     },
     "mfcc": {
         "type": "MFCCNode",
-        "children": ["alignment"],
+        "children": ["sdtw"],
         "ref_sig_key": "reference_signal",
         "deg_sig_key": "degraded_signal"
     },
-    "alignment": {
-        "type": "WarpQAlignmentNode",
+    "sdtw": {
+        "type": "WarpQSDTWNode",
         "children": ["output"],
         "output_key": "warp_q",
         "mfcc_ref_key": "mfcc_ref",

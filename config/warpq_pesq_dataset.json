@@ -162,8 +162,9 @@
 	"Graph Output": {
 		"type": "GraphNode",
 		"df_key": "dataframe",
-		"x_data_keys": ["warp_q_mel", "warp_q_mfcc", "pesq"],
-		"y_data_key": "MOS",
-		"labels": ["WARP-Q Mel", "WARP-Q MFCC", "PESQ"]
+		"x_data_key": "MOS",
+		"y_data_keys": ["warp_q_mel", "warp_q_mfcc", "pesq"],
+		"y_labels": ["WARP-Q Distance", "WARP-Q Distance", "Predicted MOS"],
+		"titles": ["WARP-Q Mel", "WARP-Q MFCC", "PESQ"]
 	}
 }
