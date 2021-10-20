@@ -1,22 +1,94 @@
-# Audio Quality Pipeline - AQP 
+# Audio Quality Platform - AQP
 
-## A pipeline for running and comparing audio quality metrics
+## An Open Modular Python Platform for Objective Speech and Audio Quality Metrics
 
-***
+---
 
-## Introduction
+AQP is a highly modular pipeline designed to enable the testing and comparison of different objective speech and audio quality metrics (e.g. ViSQOL, PESQ, Warp-Q, etc.). AQP allows researchers to test and compare objective quality metrics helping to improve robustness, reproducibility and development speed.
 
-AQP is a highly module pipeline designed to enable the running and comparison of different configurations of quality metrics, such as ViSQOL, PESQ, Warp-Q, etc., on single reference/degraded signal input or on datasets containing information on the reference/degraded signals. 
+Earlier speech/audio quality models were developed in either C/C++ for speed or MATLAB for research prototyping and were based on monolithic codebases that were difficult to adapt or extend. Models such as NISQA , CDPAM ,SESQA and WARP-Q have been developed using standard python libraries. Python has matured and become widely adopted in both research and industry deployment with packages and libraries available to implement many standard audio signal processing and machine learning algorithms as well as data wrangling and visualisation.
 
-AQP is built using Python and it's fundamental data structure is a Directed Acyclic Graph (DAG). Each node in the graph encapsulates some logic, e.g. loading a signal, scaling a signal, creating a spectrogram, etc. 
+With the change to using Python for research of this nature in mind, AQP was designed to be modular and easy to use for almost anyone. Using Python allows for quick testing and integration of new functionality to the pipeline. The core architecture of AQP is built up around a Directed Acyclic Graph (DAG) data structure. Each node in the graph encapsulates some logic, e.g. loading a signal, scaling a signal, creating a spectrogram, etc. 
 
-![Example Directed Acyclic Graph](images/dag.png "Example DAG")
+![Example Directed Acyclic Graph](images/dag.png "Example of a DAG")
 
-Alongside the DAG, the idea of aex component-based system is used to form the functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
+Alongside the DAG, some concepts from the component-based design pattern is used to form the core functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
 
-## Running the Pipeline
+## Running AQP
 
-The pipeline takes several command-line arguments, not all of which are mandatory. There are two required arguments:
+The first step to running AQP is obviously to clone the repository to a directory of your choosing.
+
+### Package Requirements
+
+AQP relies on several Python pacakges. The information about these packages is found in the ``requirements.txt`` file and they can all be installed with a single command.
+
+``pip install -r requirements.txt``
+
+### Optional Dependencies - Recommended
+
+If you are a person using a Mac or Unix based operating system and want to run the scripts located in the ``AQP/scripts`` directory, the ``subversion``   package is required. This is just to pull specific datasets from the https://github.com/QxLabIreland/datasets repository. 
+
+On Mac
+
+```
+brew install subversion
+```
+
+On Ubuntu/Debian
+
+```
+apt-get install subversion
+```
+
+For more Unix based install instructions go to https://subversion.apache.org/packages.html .
+
+There is also information there for Windows users, but likely the easiest method is to just download the full dataset repository.
+
+### Quickstart Example
+
+To get a quick idea of how the pipeline works and can be used to run an experiment there is a quickstart example that is designed to get the pipeline working in a few easy steps.
+
+The example uses a subset(the first 10 entries) of the Genspeech dataset. The full Genspeech and TCDVoip datasets are available at https://github.com/QxLabIreland/datasets. The example configuration of the pipeline is the one used in the case study of the AQP paper, which compared two variations of the Warp-Q metric vs PESQ. 
+
+### Executing  the Example Using Scripts
+
+Note:  These steps assume you have the <u>subversion</u> package installed and have access to the <u>wget</u> command.
+
+1. From the terminal, ``cd`` into the ``scripts`` directory (``AQP/scripts``)
+2. Execute the ``run_example.sh`` script using ``./run_example.sh``
+
+### Executing the Example Using No Scripts
+
+For those who don't have access to <u>subversion</u> and <u>wget</u>.
+
+1. Download the ``datasets`` repository from the link given above.
+
+2. Move/copy the ``quickstart_genspeech`` directory and the ``quickstart_genspeech.csv`` file located under ``datasets/genspeech`` to the resources folder of AQP. Resulting file structure should look like ``AQP/resources/quickstart_genspeech/`` and ``AQP/resources/quickstart_genspeech.csv``
+
+3. From the root directory of AQP, execute the following 
+
+   ```
+   python utils/prepend_files.py --prepend_with "resources/" --dataset "resources/quickstart_genspeech.csv"
+   python pipeline.py --root_node_id "Load DF" --graph_config_path "config/example.json" --plot_graph
+   ```
+
+
+After executing the quickstart example through either method described above the figure below should be produced. 
+
+![Output of running the example configuration](images/example_output_.png "Output of running the example configuration")
+
+### Moving Forward from the Example
+
+It is also easy to extend the above example to recreate the case study performed in the AQP paper. On Mac/Unix, execute the ``genspeech.sh`` script from inside the scripts directory to download the entire Genspeech dataset and csv file.  Then from the root directory execute the following commands:
+
+```
+python utils/prepend_files.py --prepend_with "resources/" --dataset "resources/genspeech.csv"
+python pipeline.py --root_node_id "Load DF" --graph_config_path "config/warpq_pesq_dataset.json" --plot_graph
+```
+
+## Command Line Arguments
+
+There are several arguments which can be passed to AQP, some are required, others optional.
 
 - ``--root_node_id``: This is the name/key of the root node of the graph. This will be the first node executed and from there it's children will be executed and so on.
 - ``--graph_config_path``: Path to the graph definition to use. 
@@ -24,13 +96,13 @@ The pipeline takes several command-line arguments, not all of which are mandator
 The other options are:
 
 - ``--plot_graph``: Flag to create a diagram of the pipeline, default is False.
-- ``--graph_output_file``: Path to file to store the created diagram, do NOT include the file extension (this is done automatically), default is "results/graph". This gets expanded to, for example, "results/graph.dot".
+- ``--graph_output_file``: Path to file to store the created DOT file, do NOT include the file extension (this is done automatically), default is "results/graph". This gets expanded to, for example, "results/graph.dot".
 - ``--debug``: Enables debug logging.
 - ``--version``: Prints the version.
 
-### Example
+## How It All Works
 
-``python pipeline.py --root_node_id "load_ref" --graph_config_path "config/my_graph.json"``
+Forewarning: Some of the configurations described below use nodes that are implemented for the ViSQOL quality metric. Some code for ViSQOL still exists on the main branch, under ``qualitymetrics/visqol``, however the nodes used for ViSQOL have been removed temporarily and are located on the ``visqol_dev`` branch. This was done due to some bugs being present. They will be added back into the main branch as soon as these bugs have been fixed. 
 
 ## Node Abstract Class
 
@@ -48,13 +120,13 @@ class Node(object):
         LOGGER.info(f'Executing node {self.id_} | type={self.type_}')
 ```
 
-There are currently **three** class which inherit/implement the Node base class, the **AQPNode**, **ViSQOLNode** and **PESQNode**. The main reason for these classes is related to outputing the pipeline in **.dot** format for GraphViz. Each node class can have a dictionary called **draw_options** passed to it and it is used to control how the node will be drawn in the output image. The three Node implementations simply add specific draw options for nodes belonging to different use cases. More on this in the **Drawing the Pipeline** section. All other node classes implement one of the three previously mentioned classes. 
+There are currently **four** class which inherit/implement the Node base class, the **AQPNode**, **ViSQOLNode** and **PESQNode** and **WarpQNode**. The main reason for these classes is related to outputing the pipeline in **.dot** format for GraphViz. Each node class can have a dictionary called **draw_options** passed to it and it is used to control how the node will be drawn in the output image. The three Node implementations simply add specific draw options for nodes belonging to different use cases. More on this in the **Drawing the Pipeline** section. All other node classes implement one of the three previously mentioned classes. 
 
 The **execute** function is main function of the pipeline, it is common to all nodes and is how data moves through the pipeline. The execute function takes in the result dictionary as an argument and should return the same dictionary in the majority of cases(more details on this in the **Advanced Nodes** section)
 
 ## Implementing a Node
 
-Adding your own node is quick and easy to do. All it requires is to implement one of **AQPNode**, **ViSQOLNode**, **PESQNode** or your own base node that you've created. Then the ``__init__`` function and the ``execute`` function must be implemented. 
+Adding your own node is quick and easy to do. All it requires is to implement one of **AQPNode**, **ViSQOLNode**, **PESQNode**, **WarpQNode** or your own base node that you've created. Then the ``__init__`` function and the ``execute`` function must be implemented. 
 
 Example
 
@@ -127,7 +199,7 @@ class ScaleSignalsNode(AQPNode):
 
 ### How the Pipeline is Created
 
-The pipeline is defined as a collection of connected nodes. This information is described through a JSON configuration file. This file is passed to the program on startup as a command-line argument, ``--graph_config_path``, which has a default value of ``config/graph.json``. Each entry in the JSON file is used to describe some node in the pipeline. The key for an entry is used as a unique id for each node and is how nodes are connected together. The values associated with the key are then used as the construction parameters for a node, with some extra parameters, such as ``children`` and ``type`` being used to facilitate the creation of connections between nodes and instructing the pipeline in which type of node to create.
+The pipeline is defined as a collection of connected nodes. This information is described through a JSON configuration file. This file is passed to the program on startup as a command-line argument, ``--graph_config_path``. Each entry in the JSON file is used to describe some node in the pipeline. The key for an entry is used as a unique id for each node and is how nodes are connected together. The values associated with the key are then used as the construction parameters for a node, with some extra parameters, such as ``children`` and ``type`` being used to facilitate the creation of connections between nodes and instructing the pipeline in which type of node to create.
 
 ### Example
 
@@ -155,7 +227,7 @@ The pipeline is defined as a collection of connected nodes. This information is 
 
 The above configuration results in a graph that looks like the image below. 
 
-![](images/example_simple_pipeline.png "Simple pipeline")
+![](C:\Users\jgera\Documents\ComputerScience\AQP\images\example_simple_pipeline.png "Simple pipeline")
 
 ## Advanced Nodes
 
@@ -164,7 +236,6 @@ The above configuration results in a graph that looks like the image below.
 The LoopNode is used to loop over some iterable entry in the result dictionary. When creating a LoopNode a definition is provided of all the nodes which it should loop over using each entry in the iterable object. Each iteration, a copy of the original dictionary is used (so as to avoid key conflicts), and this copy is then assigned to a results dictionary. The output of the loop node is this results dictionary, it gets assigned to the main result dictionary. The execute function of the LoopNode is shown below.
 
 ```python
-
 def execute(self, result: dict, **kwargs):
 	super().execute(result)
     results = {}
@@ -311,8 +382,6 @@ def execute(self, result: dict, **kwargs):
     return result if self.counter == self.num_expected_results else None
 ```
 
-
-
 ### TransformNode
 
 The TransformNode contains several transformation function which can be used to operate on some data contained within the result dictionary. These functions/transforms could have been encapsulated into their own nodes, but they're short and having each of them be defined separately would bloat the nodes directory further. The transforms so far, are designed around taking some value(s) from the result dictionary and creating some new value or remove a layer of nesting etc. So far there are three transforms used:
@@ -339,40 +408,44 @@ Example
 
 
 
-## Advanced Pipeline Example
-
-### Comparing ViSQOL Configuration
+## Advanced Pipeline Example - Case Study Config
 
 ```json
 {
-	"load_dataframe": {
+	"Load DF": {
 		"type": "LoadCSVAsDFNode",
-		"children": ["cols_to_tuple_transform"],
+		"children": ["Wrangle Data"],
 		"output_key": "dataframe",
-		"path_to_csv": "resources/dataset.csv"
+		"path_to_csv": "resources/genspeech.csv"
 	},
-	"cols_to_tuple_transform": {
+	"Wrangle Data": {
 		"type": "TransformNode",
-		"children": ["dataset_loop"],
+		"children": ["Add sr"],
 		"transform_name": "df_columns_to_tuples",
 		"target_key": "dataframe",
 		"output_key": "wav_files",
 		"function_args": {
-			"col_one": "ref_wav",
-			"col_two": "deg_wav"
+			"col_one": "Ref_Wave",
+			"col_two": "Test_Wave"
 		}
 	},
-	"dataset_loop": {
+	"Add sr": {
+		"type": "VariableNode",
+		"children": ["DF Loop"],
+		"output_key": "sr",
+		"variable_value": 16000
+	},
+	"DF Loop": {
 		"type": "LoopNode",
-		"children": ["output"],
+		"children": ["DF to csv"],
 		"output_key": "dataset_output",
 		"iterable_key": "wav_files",
-		"start_node": "tuple_to_top_level",
-		"key_blacklist": ["wav_files", "vnsims_gamma", "vnsims_mel", "vnsims_goertzel"],
+		"start_node": "Tuple Transform",
+		"key_blacklist": [],
 		"node_data": {
-			"tuple_to_top_level": {
+			"Tuple Transform": {
 				"type": "TransformNode",
-				"children": ["load_ref"],
+				"children": ["Load Ref"],
 				"transform_name": "tuple_to_top_level",
 				"target_key": "iterator_item",
 				"function_args": {
@@ -380,66 +453,132 @@ Example
 					"degraded_file_key": "degraded"
 				}
 			},
-			"load_ref": {
+			"Load Ref": {
 				"type": "LoadSignalNode",
-				"children": ["load_deg"],
+				"children": ["Load Test"],
+				"target_sample_rate": 16000,
 				"file_name_key": "reference_file",
 				"signal_key": "reference",
 				"output_key": "reference_signal"
 			},
-			"load_deg": {
+			"Load Test": {
 				"type": "LoadSignalNode",
-				"children": ["ViSQOL_Mel", "ViSQOL_Gammatone"],
+				"children": ["VAD", "PESQ"],
+				"target_sample_rate": 16000,
 				"signal_key": "degraded",
 				"output_key": "degraded_signal",
 				"file_name_key": "degraded_file"
 			},
-			"ViSQOL_Mel": {
-				"type": "EncapsulationNode",
-				"children": ["update_df_mel"],
-				"start_node": "visqol_args",
-				"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
+			"VAD": {
+				"type": "WarpQVADNode",
+				"children": ["MFCC", "Mel"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
 			},
-			"update_df_mel": {
+			"MFCC": {
+				"type": "MFCCNode",
+				"children": ["MFCC SDTW"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
+			},
+			"Mel": {
+				"type": "MelNode",
+				"children": ["Mel SDTW"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
+			},
+			"Mel SDTW": {
+				"type": "WarpQSDTWNode",
+				"children": ["Update DF Mel"],
+				"output_key": "warp_q_mel",
+				"mfcc_ref_key": "mfcc_ref",
+				"mfcc_coded_patch_key": "mfcc_coded_patch"
+			},
+			"MFCC SDTW": {
+				"type": "WarpQSDTWNode",
+				"children": ["Update DF MFCC"],
+				"output_key": "warp_q_mfcc",
+				"mfcc_ref_key": "mfcc_ref",
+				"mfcc_coded_patch_key": "mfcc_coded_patch"
+			},
+			"Update DF Mel": {
 				"type": "TransformNode",
-				"transform_name": "update_df_by_active_channels",
+				"transform_name": "update_df",
 				"target_key": "dataframe",
 				"function_args": {
-					"key": "vnsims_mel.{}.vnsim"
+					"key": "warp_q_mel",
+					"col_name": "Ref_Wave"
+				},
+				"draw_options": {
+					"fillcolor": "#d55c00B3"
 				}
 			},
-			"ViSQOL_Gammatone": {
-				"type": "EncapsulationNode",
-				"children": ["update_df_gammatone"],
-				"start_node": "visqol_args",
-				"path_to_node_config": "config/visqol/graphs/default_visqol_gammatone.json"
-			},
-			"update_df_gammatone": {
+			"Update DF MFCC": {
 				"type": "TransformNode",
-				"transform_name": "update_df_by_active_channels",
+				"transform_name": "update_df",
 				"target_key": "dataframe",
 				"function_args": {
-					"key": "vnsims_gammatone.{}.vnsim"
+					"key": "warp_q_mfcc",
+					"col_name": "Ref_Wave"
+				},
+				"draw_options": {
+					"fillcolor": "#d55c00B3"
 				}
 			},
-			"ViSQOL_Goertzel": {
-				"type": "EncapsulationNode",
-				"children": ["update_df_goertzel"],
-				"start_node": "visqol_args",
-				"path_to_node_config": "config/visqol/graphs/default_visqol_goertzel.json"
+			"Modified VAD": {
+				"type": "WarpQVADNode",
+				"children": ["MFCC"],
+				"ref_sig_key": "reference_signal",
+				"deg_sig_key": "degraded_signal"
 			},
-			"update_df_goertzel": {
+			"PESQ": {
+				"type": "EncapsulationNode",
+				"children": ["Update DF PESQ"],
+				"start_node": "pesq_alignment",
+				"node_data": {
+					"pesq_alignment": {
+						"type": "AlignmentNode",
+						"children": ["pesq"]
+					},
+					"pesq": {
+						"type": "PyPESQNode",
+						"output_key": "pesq"
+					}
+				},
+				"draw_options": {
+					"fillcolor": "#009e74B3"
+				}
+			},
+			"Update DF PESQ": {
 				"type": "TransformNode",
-				"transform_name": "update_df_by_active_channels",
+				"transform_name": "update_df",
 				"target_key": "dataframe",
 				"function_args": {
-					"key": "vnsims_goertzel.{}.vnsim"
+					"key": "pesq",
+					"col_name": "Ref_Wave"
+				},
+				"draw_options": {
+					"fillcolor": "#009e74B3"
 				}
 			}
 		}
 	},
-	"output": {
-		"type": "IdentityNode"
+	"DF to csv": {
+		"type": "TransformNode",
+		"children": ["Graph Output"],
+		"transform_name": "to_csv",
+		"target_key": "dataframe",
+		"function_args": {
+			"output_file_name": "results/RESULTS.csv"
+		}
+	},
+	"Graph Output": {
+		"type": "GraphNode",
+		"df_key": "dataframe",
+		"x_data_key": "MOS",
+		"y_data_keys": ["warp_q_mel", "warp_q_mfcc", "pesq"],
+		"y_labels": ["WARP-Q Distance", "WARP-Q Distance", "Predicted MOS"],
+		"titles": ["WARP-Q Mel", "WARP-Q MFCC", "PESQ"]
 	}
 }
 ```
@@ -450,9 +589,8 @@ Example
 
 It is possible to output a diagram of the pipeline. This functionality is based on a combination of [GraphViz](https://graphviz.org/) and the [NetworkX](https://networkx.org/) python package. If the ``--plot_graph`` command-line argument is set, then a NetworkX version of the pipeline is built, has the ``draw_options`` associated with each node applied to the NetworkX version of the node, and finally a ``.dot`` file is generated for the graph, which can be visualized with GraphViz. Currently, only one version of the graph is produced, where all nodes, that aren't part of an EncapsulationNode are graphed. 
 
-Ideally, EncapsulationNodes will be included in future, the current issue with it relates to loop nodes within an encapsulation node and connecting them to the appropriate nodes. A
+Ideally, EncapsulationNodes will be included in future, the current issue with it relates to loop nodes within an encapsulation node and connecting them to the appropriate nodes. 
 
 Another future possibility is the drawing of a box, or something similar around loop nodes and encapsulation nodes, to highlight that they are different from the rest of the graph.
 
-![Comparing ViSQOL Configuration](images/example_multi_visqol.png "Diagram output for the Comparing ViSQOL Configuration")
-
+![Case study pipeline](images/warpq_pesq.png "Diagram output for the Comparing WarpQ and PESQ")

@@ -3,7 +3,7 @@
 /results
 
 !/resources/reference
-!/resources/degraded
+!/resources/test
 
 resources/*
 
