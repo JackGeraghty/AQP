@@ -1,0 +1,39 @@
+{
+    "one": {
+        "type": "IdentityNode",
+        "children": ["two"]
+    },
+    "two": {
+        "type": "IdentityNode",
+        "children": ["three", "four"]
+    },
+    "three": {
+        "type": "IdentityNode",
+        "children": ["five"]
+    },
+    "four": {
+        "type": "IdentityNode",
+        "children": ["five"]
+    },
+    "five": {
+        "type": "IdentityNode",
+        "children": ["six"]
+    },
+    "six": {
+        "type": "IdentityNode"
+    },
+    "seven": {
+        "type": "IdentityNode",
+        "children": ["eight"]
+    },
+    "eight": {
+        "type": "IdentityNode"
+    },
+   "nine": {
+        "type": "IdentityNode",
+        "children": ["ten"]
+    },
+    "ten": {
+        "type": "IdentityNode"
+    }
+}

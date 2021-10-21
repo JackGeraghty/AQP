@@ -56,11 +56,16 @@ def main() -> None:
         with open(Path(args.graph_config_path), 'rb') as data:
             nodes = graphutils.build_graph(json.load(data))
             root_node = nodes[args.root_node_id]
+            LOGGER.info('Performing validation checks')
+            valid, ordering = graphutils.validate_graph(root_node)
+            if not valid:
+                sys.exit(-1)
+            LOGGER.info('Passed validation')
     except FileNotFoundError as err:
         LOGGER.error(err)
         sys.exit(-1)
 
-
+    sys.exit(1)
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
         if not os.path.exists(args.graph_output_file):

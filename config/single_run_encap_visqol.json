@@ -1,0 +1,33 @@
+{
+	"load_ref": {
+		"children": ["load_deg"],
+		"type": "LoadSignalNode",
+		"signal_path": "resources/reference/ref.wav",
+		"file_name_key": "reference_file",
+		"output_key": "reference_signal"
+	},
+	"load_deg": {
+		"children": ["ViSQOL_Mel"],
+		"type": "LoadSignalNode",
+		"signal_path": "resources/test/test.wav",
+		"file_name_key": "degraded_file",
+		"output_key": "degraded_signal"
+	},
+	"ViSQOL_Mel": {
+		"children": ["output"],
+		"type": "EncapsulationNode",
+		"start_node": "visqol_args",
+		"path_to_node_config": "config/visqol/graphs/default_visqol_mel.json"
+	},
+     "mos_mapping": {
+        "type": "MOSMapperNode",
+        "children": ["output"],
+        "output_key": "mos",
+        "target_key": "vnsims_mel.similarity_data",
+        "visqol_args_key": "visqol_args"
+    },
+
+    "output": {
+        "type": "IdentityNode"
+    }
+}
