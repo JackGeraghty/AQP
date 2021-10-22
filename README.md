@@ -14,7 +14,7 @@ With the change to using Python for research of this nature in mind, AQP was des
 
 Alongside the DAG, some concepts from the component-based design pattern is used to form the core functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
 
-## Running AQP
+## Running AQP	
 
 The first step to running AQP is obviously to clone the repository to a directory of your choosing.
 
@@ -86,6 +86,10 @@ python utils/prepend_files.py --prepend_with "resources/" --dataset "resources/g
 python pipeline.py --root_node_id "Load DF" --graph_config_path "config/warpq_pesq_dataset.json" --plot_graph
 ```
 
+The figure below shows the expected output after executing the above commands and allowing the pipeline to run on the full Genspeech dataset.
+
+## ![Output of running the example configuration](images/full_warpq_pesq.png "Output of running the example configuration")
+
 ## Command Line Arguments
 
 There are several arguments which can be passed to AQP, some are required, others optional.
@@ -103,6 +107,10 @@ The other options are:
 ## How It All Works
 
 Forewarning: Some of the configurations described below use nodes that are implemented for the ViSQOL quality metric. Some code for ViSQOL still exists on the main branch, under ``qualitymetrics/visqol``, however the nodes used for ViSQOL have been removed temporarily and are located on the ``visqol_dev`` branch. This was done due to some bugs being present. They will be added back into the main branch as soon as these bugs have been fixed. 
+
+The Visqol branch has plenty of examples of how nodes can be created and used to encapsulate different bits of functionality.
+
+In future we plan on adding more quality metrics, datasets and core nodes to the platform. Stay tuned folks!
 
 ## Node Abstract Class
 
