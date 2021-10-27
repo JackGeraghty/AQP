@@ -14,6 +14,10 @@ With the change to using Python for research of this nature in mind, AQP was des
 
 Alongside the DAG, some concepts from the component-based design pattern is used to form the core functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
 
+## Important Notice
+
+Due to this repository being included in the submission, detailed in the next section, this repository will be kept as is. However, the repository and any future commits will be available here https://github.com/QxLabIreland/AQP
+
 ## Citing AQP
 
 The AQP paper is currently under review for the IEEE ICASSP 2022 conference. The design of AQP is described in the following paper available on arXiv. 
