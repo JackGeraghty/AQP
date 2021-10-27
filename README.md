@@ -14,6 +14,14 @@ With the change to using Python for research of this nature in mind, AQP was des
 
 Alongside the DAG, some concepts from the component-based design pattern is used to form the core functionality of the pipeline. A result dictionary is declared before the pipeline is executed. This dictionary is passed to each node and it's contents are either retrieved to use as input to the encapsulated logic and/or updated with the results of executing the node. 
 
+## Citing AQP
+
+The AQP paper is currently under review for the IEEE ICASSP 2022 conference. The design of AQP is described in the following paper available on arXiv. 
+
+[J. Geraghty, J. Li, A. Ragano and A. Hine, "AQP: An Open Modular Python Platform for Objective Speech and Audio Quality Metrics", submitted to IEEE ICASSP 2022](https://arxiv.org/abs/2110.13589#)
+
+---
+
 ## Running AQP	
 
 The first step to running AQP is obviously to clone the repository to a directory of your choosing.
