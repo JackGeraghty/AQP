@@ -131,6 +131,7 @@ class TransformNode(AQPNode):
                  draw_options: dict=None, **kwargs):
         super().__init__(id_, output_key=output_key, draw_options=draw_options)
         self.function = FUNCTIONS[transform_name]
+        self.transform_name = transform_name
         self.function_args = function_args
         self.target_key = target_key
         self.type_ = 'TransformNode'
@@ -151,7 +152,9 @@ class TransformNode(AQPNode):
             Dict representation of the node.
 
         """
-        return {
+        d = super().__dict__()
+        return {**d , ** {
                 "output_key": self.output_key,
-                "target_key": self.target_key
-            }
+                "target_key": self.target_key,
+                "transform_name": self.transform_name
+            }}

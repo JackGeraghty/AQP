@@ -5,11 +5,13 @@ import logging
 import pipeline
 import networkx as nx
 import numpy as np
+import copy
+from dataclasses import dataclass
 from nodes.node import Node
 from nodes.loopnode import LoopNode
 from nodes.encapsulationnode import EncapsulationNode
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple, List
 
 LOGGER = logging.getLogger(pipeline.LOGGER_NAME)
 
@@ -173,6 +175,7 @@ def build_nx_graph(node: Node, edge_list, nx_graph, recursive=False):
     nx_graph.add_edges_from(edge_list)
     return nx_graph
  
+    
 def check_for_cycles(start_node):
     stack = []
     stack.append(start_node)
@@ -184,7 +187,7 @@ def check_for_cycles(start_node):
             LOGGER.error("Cycle Detected, node with id %s is referenced to create a cycle", node.id_)            
             return None
         visited.add(node.n_id)
-        ordering.append(node.id_)
+        ordering.append(node)
         children = node.children
 
         if isinstance(node, (LoopNode, EncapsulationNode)):
@@ -199,13 +202,97 @@ def check_for_cycles(start_node):
 
 
 def has_unreachable_nodes(ordering):
+    ordering_ids = [i.id_ for i in ordering]
     for deserialized_node in DESERIALIZED_NODES:
-        if deserialized_node not in ordering:
+        if deserialized_node not in ordering_ids:
             LOGGER.error("Found unreachable node %s", deserialized_node)
             return True
     return False
+
 
 def validate_graph(root_node):
     if (ordering := check_for_cycles(root_node)) is None:
         return False
     return not has_unreachable_nodes(ordering), ordering
+
+
+def build_visualization(ordering_: List[Tuple[str, Node]]):
+    import random
+    ordering = list(ordering_)
+    @dataclass
+    class Subgraph():
+        prev_node: Node
+        next_node: Node
+        subgraph_nodes: List[Node]
+        
+        def contains(self, node: Node):
+            return node in self.subgraph_nodes 
+        
+        def contains(self, subgraph: List[Node]):
+            return all(node in self.subgraph_nodes for node in subgraph)
+        
+        
+        def __str__(self):
+            return f'{self.prev_node.id_}->{self.next_node.id_ if self.next_node else "NONE"}\nsubgraph: {[n.id_ for n in self.subgraph_nodes]}'
+    
+        def __repr__(self):
+            return self.__str__()
+        
+    graph_info = []
+    while len(ordering) > 0:
+        current_node = ordering.pop(0)
+        next_node = current_node.children[0] if current_node.children else None
+        
+        if isinstance(current_node, (LoopNode, EncapsulationNode)):
+            for i in range(len(ordering)):
+                if ordering[i] == next_node:
+                    print(f'Found the next node {i} places on from the current node')
+                    next_node_index = i        
+            subgraph = Subgraph(current_node, next_node, ordering[:next_node_index])
+            graph_info.append(subgraph)
+            
+    def build_subgraph(subgraph) -> nx.DiGraph:
+        nx_graph = nx.DiGraph(name=f'cluster_{random.randint(0,10)}')
+        nx_graph.add_node(subgraph.prev_node.id_, data=subgraph.prev_node)
+        if subgraph.next_node:
+            nx_graph.add_node(subgraph.next_node.id_, data=subgraph.next_node)
+        
+        for node in subgraph.subgraph_nodes:
+            nx_graph.add_node(node.id_, data=node)
+        
+        nx_graph.add_edge(subgraph.prev_node.id_, subgraph.subgraph_nodes[0].id_)
+        if subgraph.next_node:
+            nx_graph.add_edge(subgraph.subgraph_nodes[-1].id_, subgraph.next_node.id_)
+        for node in subgraph.subgraph_nodes[0:-1]:
+            for child_node in node.children:
+                nx_graph.add_edge(node.id_, child_node.id_)
+        
+        return nx_graph
+    x = nx.DiGraph()
+    subgraphs = [build_subgraph(subgraph) for subgraph in graph_info]
+    
+    for i in range(len(subgraphs)-1, -1, -1):
+        x = nx.compose(subgraphs[i], x)
+    
+    for sg in graph_info:
+        if sg.next_node and x.has_edge(sg.prev_node.id_, sg.next_node.id_):
+            x.remove_edge(sg.prev_node.id_, sg.next_node.id_)
+    
+    non_subgraph_nodes = []
+    for node in ordering_:
+        if not x.has_node(node.id_):
+            non_subgraph_nodes.append(node)
+            x.add_node(node.id_, data=node)
+    for node in non_subgraph_nodes:
+        x.add_edges_from([(node.id_, child.id_) for child in node.children])
+    
+    for node in x.nodes:
+        draw_options = x.nodes[node]['data'].draw_options
+        if draw_options:
+            x.nodes[node].update(draw_options)
+            
+    last_node = ordering_[-1]
+    leaf_nodes = [node for node in x.nodes() if x.out_degree(node) == 0 and node != last_node.id_]
+    for leaf in leaf_nodes:
+        x.add_edge( leaf, last_node.id_)
+    return x

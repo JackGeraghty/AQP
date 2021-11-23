@@ -21,7 +21,7 @@ Command Line Args:
         
         --version: displays the version info.
 """
-# /usr/bin/env python3.9
+# /usr/bin/env python3.8
 
 import argparse
 import json
@@ -58,6 +58,9 @@ def main() -> None:
             root_node = nodes[args.root_node_id]
             LOGGER.info('Performing validation checks')
             valid, ordering = graphutils.validate_graph(root_node)
+            print()
+            LOGGER.info([o.id_ for o in ordering])
+            print()
             if not valid:
                 sys.exit(-1)
             LOGGER.info('Passed validation')
@@ -65,7 +68,8 @@ def main() -> None:
         LOGGER.error(err)
         sys.exit(-1)
 
-    sys.exit(1)
+   
+
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
         if not os.path.exists(args.graph_output_file):
@@ -74,9 +78,11 @@ def main() -> None:
             draw_options = nx_graph.nodes[node]['data'].draw_options
             if draw_options:
                 nx_graph.nodes[node].update(draw_options)
+        expanded_graph = graphutils.build_visualization(ordering)
         write_dot(nx_graph, args.graph_output_file + '.dot')    
+        write_dot(expanded_graph, args.graph_output_file + '_expanded.dot')
         LOGGER.info('Graphs written to .dot files')
-
+    sys.exit(0)
     result = {}
     LOGGER.info("Running pipeline...")
     graphutils.run_node(root_node, result)

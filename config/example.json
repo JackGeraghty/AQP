@@ -112,12 +112,6 @@
 					"fillcolor": "#d55c00B3"
 				}
 			},
-			"Modified VAD": {
-				"type": "WarpQVADNode",
-				"children": ["MFCC"],
-				"ref_sig_key": "reference_signal",
-				"deg_sig_key": "degraded_signal"
-			},
 			"PESQ": {
 				"type": "EncapsulationNode",
 				"children": ["Update DF PESQ"],
