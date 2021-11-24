@@ -4,8 +4,7 @@ import importlib
 import logging
 import pipeline
 import networkx as nx
-import numpy as np
-import copy
+import pydot 
 from dataclasses import dataclass
 from nodes.node import Node
 from nodes.loopnode import LoopNode
@@ -132,50 +131,6 @@ def build_graph(graph_definition: dict) -> Dict[Node, str]:
     return nodes
 
 
-def get_leaf_nodes(nodes):
-    return[nodes[node] for node in nodes if nodes[node].is_leaf() and not isinstance(nodes[node], LoopNode)]
-
-
-def build_nx_graph(node: Node, edge_list, nx_graph, recursive=False):
-    
-    def _handle_execution_node(execution_node: Node, node_id: str, edges_to_rework: list, edge_list: list, nx_graph: nx.DiGraph):
-        """Rework nodes that contain a node with them. 
-        
-        Takes the current node, a loop or encapsulation node, and adds an 
-        edge to it's execution_node attribute. Then the last nodes of inner 
-        graph get connected to the current nodes children. 
-        
-        """
-        for i in range(len(edges_to_rework)):
-            edge_list.pop()
-        
-        edge_list.append((node.id_, node.execution_node.id_))
-        build_nx_graph(node.execution_node, edge_list, nx_graph, recursive)
-        
-        leaf_nodes = get_leaf_nodes(node.nodes)
-
-        for last_node in leaf_nodes:
-            for edge in edges_to_rework:
-                edge_list.append((last_node.id_, edge[1]))    
-                
-    nx_graph.add_node(node.id_, data=node)
-    current_edges = [(node.id_, child_node.id_) for child_node in node.children]
-    edge_list.extend(current_edges)
-    
-    # Only do this logic if the full expanded graph is being built
-    if recursive and isinstance(node, EncapsulationNode):
-        _handle_execution_node(node, node.id_, current_edges, edge_list, nx_graph)
-
-    if isinstance(node, LoopNode):
-        _handle_execution_node(node.nodes, node.id_, current_edges, edge_list, nx_graph)
-        
-    for child_node in node.children:
-        build_nx_graph(child_node, edge_list, nx_graph, recursive)
-    
-    nx_graph.add_edges_from(edge_list)
-    return nx_graph
- 
-    
 def check_for_cycles(start_node):
     stack = []
     stack.append(start_node)
@@ -217,7 +172,6 @@ def validate_graph(root_node):
 
 
 def build_visualization(ordering_: List[Tuple[str, Node]]):
-    import random
     ordering = list(ordering_)
     @dataclass
     class Subgraph():
@@ -227,10 +181,6 @@ def build_visualization(ordering_: List[Tuple[str, Node]]):
         
         def contains(self, node: Node):
             return node in self.subgraph_nodes 
-        
-        def contains(self, subgraph: List[Node]):
-            return all(node in self.subgraph_nodes for node in subgraph)
-        
         
         def __str__(self):
             return f'{self.prev_node.id_}->{self.next_node.id_ if self.next_node else "NONE"}\nsubgraph: {[n.id_ for n in self.subgraph_nodes]}'
@@ -251,48 +201,63 @@ def build_visualization(ordering_: List[Tuple[str, Node]]):
             subgraph = Subgraph(current_node, next_node, ordering[:next_node_index])
             graph_info.append(subgraph)
             
-    def build_subgraph(subgraph) -> nx.DiGraph:
-        nx_graph = nx.DiGraph(name=f'cluster_{random.randint(0,10)}')
-        nx_graph.add_node(subgraph.prev_node.id_, data=subgraph.prev_node)
+    def build_subgraph(subgraph) -> pydot.Subgraph:
+        graph = pydot.Dot("test", graph_type='digraph')
+        # nx_graph = nx.DiGraph()
+        
+        graph.add_node(pydot.Node(subgraph.prev_node.id_, **subgraph.prev_node.draw_options))
+        # nx_graph.add_node(subgraph.prev_node.id_, data=subgraph.prev_node)
+        
         if subgraph.next_node:
-            nx_graph.add_node(subgraph.next_node.id_, data=subgraph.next_node)
+            graph.add_node(pydot.Node(subgraph.next_node.id_, **subgraph.next_node.draw_options))
         
         for node in subgraph.subgraph_nodes:
-            nx_graph.add_node(node.id_, data=node)
+            graph.add_node(pydot.Node(node.id_, **node.draw_options))
         
-        nx_graph.add_edge(subgraph.prev_node.id_, subgraph.subgraph_nodes[0].id_)
+        graph.add_edge(pydot.Edge(subgraph.prev_node.id_, subgraph.subgraph_nodes[0].id_))
         if subgraph.next_node:
-            nx_graph.add_edge(subgraph.subgraph_nodes[-1].id_, subgraph.next_node.id_)
+            graph.add_edge(pydot.Edge(subgraph.subgraph_nodes[-1].id_, subgraph.next_node.id_))
         for node in subgraph.subgraph_nodes[0:-1]:
             for child_node in node.children:
-                nx_graph.add_edge(node.id_, child_node.id_)
+                graph.add_edge(pydot.Edge(node.id_, child_node.id_))
         
-        return nx_graph
-    x = nx.DiGraph()
+        return graph
+    
+    merged_graph = pydot.Dot('merged_graph', graph_type='digraph')
+    
+    #x = nx.DiGraph()
     subgraphs = [build_subgraph(subgraph) for subgraph in graph_info]
     
     for i in range(len(subgraphs)-1, -1, -1):
-        x = nx.compose(subgraphs[i], x)
-    
-    for sg in graph_info:
-        if sg.next_node and x.has_edge(sg.prev_node.id_, sg.next_node.id_):
-            x.remove_edge(sg.prev_node.id_, sg.next_node.id_)
-    
-    non_subgraph_nodes = []
-    for node in ordering_:
-        if not x.has_node(node.id_):
-            non_subgraph_nodes.append(node)
-            x.add_node(node.id_, data=node)
-    for node in non_subgraph_nodes:
-        x.add_edges_from([(node.id_, child.id_) for child in node.children])
-    
-    for node in x.nodes:
-        draw_options = x.nodes[node]['data'].draw_options
-        if draw_options:
-            x.nodes[node].update(draw_options)
+        for node in subgraph.get_nodes():
+            merged_graph.add_node(node)
             
-    last_node = ordering_[-1]
-    leaf_nodes = [node for node in x.nodes() if x.out_degree(node) == 0 and node != last_node.id_]
-    for leaf in leaf_nodes:
-        x.add_edge( leaf, last_node.id_)
-    return x
+        for edge in subgraph.get_nodes():
+            merged_graph.add_edge(edge)
+        
+    
+    # for i in range(len(subgraphs)-1, -1, -1):
+    #     x = nx.compose(subgraphs[i], x)
+    
+    # for sg in graph_info:
+    #     if sg.next_node and x.has_edge(sg.prev_node.id_, sg.next_node.id_):
+    #         x.remove_edge(sg.prev_node.id_, sg.next_node.id_)
+    
+    # non_subgraph_nodes = []
+    # for node in ordering_:
+    #     if not x.has_node(node.id_):
+    #         non_subgraph_nodes.append(node)
+    #         x.add_node(node.id_, data=node)
+    # for node in non_subgraph_nodes:
+    #     x.add_edges_from([(node.id_, child.id_) for child in node.children])
+    
+    # for node in x.nodes:
+    #     draw_options = x.nodes[node]['data'].draw_options
+    #     if draw_options:
+    #         x.nodes[node].update(draw_options)
+            
+    # last_node = ordering_[-1]
+    # leaf_nodes = [node for node in x.nodes() if x.out_degree(node) == 0 and node != last_node.id_]
+    # for leaf in leaf_nodes:
+    #     x.add_edge( leaf, last_node.id_)
+    return merged_graph

@@ -61,14 +61,12 @@ def main() -> None:
             print()
             LOGGER.info([o.id_ for o in ordering])
             print()
-            if not valid:
-                sys.exit(-1)
             LOGGER.info('Passed validation')
     except FileNotFoundError as err:
         LOGGER.error(err)
         sys.exit(-1)
 
-   
+    graphutils.build_visualization(ordering)
 
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
