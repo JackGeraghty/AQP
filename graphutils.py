@@ -175,89 +175,87 @@ def build_visualization(ordering_: List[Tuple[str, Node]]):
     ordering = list(ordering_)
     @dataclass
     class Subgraph():
-        prev_node: Node
-        next_node: Node
+        index_range: Tuple[int, int]
         subgraph_nodes: List[Node]
         
         def contains(self, node: Node):
             return node in self.subgraph_nodes 
         
         def __str__(self):
-            return f'{self.prev_node.id_}->{self.next_node.id_ if self.next_node else "NONE"}\nsubgraph: {[n.id_ for n in self.subgraph_nodes]}'
+            return f'Index Range: {self.index_range}\nsubgraph: {[n.id_ for n in self.subgraph_nodes]}'
     
         def __repr__(self):
             return self.__str__()
         
-    graph_info = []
-    while len(ordering) > 0:
-        current_node = ordering.pop(0)
-        next_node = current_node.children[0] if current_node.children else None
+    
+    # is r_two within r_one
+    # start indexes cannot be the same but can have the same end index
+    def within_range(r_one, r_two):
+        return r_two[1] <= r_one[1] and r_two[0] > r_one[0]
+    
+    info = {}
+    
+    for i in range(len(ordering_)):
         
-        if isinstance(current_node, (LoopNode, EncapsulationNode)):
-            for i in range(len(ordering)):
-                if ordering[i] == next_node:
-                    print(f'Found the next node {i} places on from the current node')
-                    next_node_index = i        
-            subgraph = Subgraph(current_node, next_node, ordering[:next_node_index])
-            graph_info.append(subgraph)
+        current = ordering_[i]
+        next_node = current.children[0] if current.children else None
+        
+        if isinstance(current, (LoopNode, EncapsulationNode)):
+            for j in  range(i, len(ordering_)):
+                if ordering[j] == next_node:
+                    print(f'Found the next node {j - i} places on from the current node')
+                    break
+            info[(i, j)] = [x.id_ for x in ordering[i:j]]
             
-    def build_subgraph(subgraph) -> pydot.Subgraph:
-        graph = pydot.Dot("test", graph_type='digraph')
-        # nx_graph = nx.DiGraph()
-        
-        graph.add_node(pydot.Node(subgraph.prev_node.id_, **subgraph.prev_node.draw_options))
-        # nx_graph.add_node(subgraph.prev_node.id_, data=subgraph.prev_node)
-        
-        if subgraph.next_node:
-            graph.add_node(pydot.Node(subgraph.next_node.id_, **subgraph.next_node.draw_options))
-        
-        for node in subgraph.subgraph_nodes:
-            graph.add_node(pydot.Node(node.id_, **node.draw_options))
-        
-        graph.add_edge(pydot.Edge(subgraph.prev_node.id_, subgraph.subgraph_nodes[0].id_))
-        if subgraph.next_node:
-            graph.add_edge(pydot.Edge(subgraph.subgraph_nodes[-1].id_, subgraph.next_node.id_))
-        for node in subgraph.subgraph_nodes[0:-1]:
-            for child_node in node.children:
-                graph.add_edge(pydot.Edge(node.id_, child_node.id_))
-        
-        return graph
-    
-    merged_graph = pydot.Dot('merged_graph', graph_type='digraph')
-    
-    #x = nx.DiGraph()
-    subgraphs = [build_subgraph(subgraph) for subgraph in graph_info]
-    
-    for i in range(len(subgraphs)-1, -1, -1):
-        for node in subgraph.get_nodes():
-            merged_graph.add_node(node)
+    seen_ranges = {}            
+    indexes = [x for x in info]
+    for i in range(len(indexes)-1, -1, -1):
+        index_range = indexes[i]
+        nodes_in_range = info[index_range]
+        contained_ranges = [k for k in seen_ranges if within_range(index_range, k)]
+        if len(contained_ranges) == 0 and index_range not in seen_ranges:
+            seen_ranges[index_range] = nodes_in_range
+        else:
+            current_entry = contained_ranges[-1]
             
-        for edge in subgraph.get_nodes():
-            merged_graph.add_edge(edge)
+            current_start_index = index_range[0]
+            amount_to_prepend =  current_entry[0] - current_start_index
+            new_entry = []
+            for j in range(current_start_index, current_start_index + amount_to_prepend):
+                new_entry.append(ordering[j].id_)
+            contained_ranges.reverse()
+            for r in contained_ranges:
+                new_entry.append(seen_ranges[r])
+                seen_ranges.pop(r, None)
+            seen_ranges[index_range] = new_entry
+   
+    
+    # now have the necessary lists, need to add in the non-nested data
+    if len(seen_ranges) > 1:
+       LOGGER.WARN('Found more than one final range, need to investigate')
+      
+    final_range = list(seen_ranges.keys())[0]
+    final_nested_structure = []
+    for i in range(final_range[0]):
+        final_nested_structure.append(ordering_[i].id_)
+    final_nested_structure.append(seen_ranges[final_range])
+    total_nested_count = 0
+    
+    for i in range(final_range[1]+1, len(ordering_)):
+        final_nested_structure.append(ordering_[i].id_)
         
-    
-    # for i in range(len(subgraphs)-1, -1, -1):
-    #     x = nx.compose(subgraphs[i], x)
-    
-    # for sg in graph_info:
-    #     if sg.next_node and x.has_edge(sg.prev_node.id_, sg.next_node.id_):
-    #         x.remove_edge(sg.prev_node.id_, sg.next_node.id_)
-    
-    # non_subgraph_nodes = []
-    # for node in ordering_:
-    #     if not x.has_node(node.id_):
-    #         non_subgraph_nodes.append(node)
-    #         x.add_node(node.id_, data=node)
-    # for node in non_subgraph_nodes:
-    #     x.add_edges_from([(node.id_, child.id_) for child in node.children])
-    
-    # for node in x.nodes:
-    #     draw_options = x.nodes[node]['data'].draw_options
-    #     if draw_options:
-    #         x.nodes[node].update(draw_options)
+    def recur_print(nested_list, indent_level=0):
+        for x in nested_list:
             
-    # last_node = ordering_[-1]
-    # leaf_nodes = [node for node in x.nodes() if x.out_degree(node) == 0 and node != last_node.id_]
-    # for leaf in leaf_nodes:
-    #     x.add_edge( leaf, last_node.id_)
-    return merged_graph
+            if isinstance(x, list):
+                print("INDENTING")
+                indent_level += 1
+                recur_print(x, indent_level)
+                indent_level -= 1
+                
+            else:
+                tab_str = indent_level * '\t'
+                print(f'{tab_str}{x}')
+    recur_print(final_nested_structure)
+    print(final_nested_structure)
+    return None
