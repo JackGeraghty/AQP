@@ -28,6 +28,7 @@ import json
 import logging
 import sys
 import graphutils
+import graphvis
 import os
 import networkx as nx
 
@@ -66,7 +67,8 @@ def main() -> None:
         LOGGER.error(err)
         sys.exit(-1)
 
-    graphutils.build_visualization(ordering)
+    graph_info = graphvis.build_visualization(ordering)
+    dot = graphvis.generate_dot_file(ordering, graph_info)
 
     if args.plot_graph:
         nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())

@@ -7,7 +7,8 @@ import graphutils
 
 from .node import AQPNode
 from pathlib import Path
-from pipeline import LOGGER_NAME
+# from pipeline import LOGGER_NAME
+LOGGER_NAME = 'pipeline'
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 

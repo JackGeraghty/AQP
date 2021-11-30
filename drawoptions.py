@@ -2,9 +2,9 @@
 
 _DEFAULT_DRAW_OPTIONS = {'shape': 'box', 'style': 'filled'}
 _DEFAULT_AQP_OPTIONS = {'fillcolor': '#ffffff'}
-_DEFAULT_VISQOL_OPTIONS = {'fillcolor': '#56b3e9B3'}
-_DEFAULT_PESQ_OPTIONS = {'fillcolor': '#009e74B3'}
-_DEFAULT_WARP_Q_OPTIONS = {'fillcolor': '#d55c00B3'}
+_DEFAULT_VISQOL_OPTIONS = {'fillcolor': '#56b3e9'}
+_DEFAULT_PESQ_OPTIONS = {'fillcolor': '#009e74'}
+_DEFAULT_WARP_Q_OPTIONS = {'fillcolor': '#d55c00'}
 
 DRAW_OPTIONS = {
         "AQP": _DEFAULT_AQP_OPTIONS,

@@ -4,8 +4,8 @@ import logging
 import graphutils
 
 from .node import AQPNode
-from pipeline import LOGGER_NAME
-
+# from pipeline import LOGGER_NAME
+LOGGER_NAME = 'pipeline'
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 class LoopNode(AQPNode):

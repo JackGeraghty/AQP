@@ -2,17 +2,14 @@
 
 import importlib
 import logging
-import pipeline
-import networkx as nx
-import pydot 
-from dataclasses import dataclass
+
 from nodes.node import Node
 from nodes.loopnode import LoopNode
 from nodes.encapsulationnode import EncapsulationNode
 from pathlib import Path
-from typing import Dict, Tuple, List
-
-LOGGER = logging.getLogger(pipeline.LOGGER_NAME)
+from typing import Dict
+LOGGER_NAME = 'pipeline'
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 AVAILABLE_NODES = {path.name[:-len('.py')].lower(): str(path)[:-len('.py')].lower(
 ).replace('/', '.').replace('\\', '.') for path in Path('nodes/').rglob('*.py')}
@@ -169,93 +166,3 @@ def validate_graph(root_node):
     if (ordering := check_for_cycles(root_node)) is None:
         return False
     return not has_unreachable_nodes(ordering), ordering
-
-
-def build_visualization(ordering_: List[Tuple[str, Node]]):
-    ordering = list(ordering_)
-    @dataclass
-    class Subgraph():
-        index_range: Tuple[int, int]
-        subgraph_nodes: List[Node]
-        
-        def contains(self, node: Node):
-            return node in self.subgraph_nodes 
-        
-        def __str__(self):
-            return f'Index Range: {self.index_range}\nsubgraph: {[n.id_ for n in self.subgraph_nodes]}'
-    
-        def __repr__(self):
-            return self.__str__()
-        
-    
-    # is r_two within r_one
-    # start indexes cannot be the same but can have the same end index
-    def within_range(r_one, r_two):
-        return r_two[1] <= r_one[1] and r_two[0] > r_one[0]
-    
-    info = {}
-    
-    for i in range(len(ordering_)):
-        
-        current = ordering_[i]
-        next_node = current.children[0] if current.children else None
-        
-        if isinstance(current, (LoopNode, EncapsulationNode)):
-            for j in  range(i, len(ordering_)):
-                if ordering[j] == next_node:
-                    print(f'Found the next node {j - i} places on from the current node')
-                    break
-            info[(i, j)] = [x.id_ for x in ordering[i:j]]
-            
-    seen_ranges = {}            
-    indexes = [x for x in info]
-    for i in range(len(indexes)-1, -1, -1):
-        index_range = indexes[i]
-        nodes_in_range = info[index_range]
-        contained_ranges = [k for k in seen_ranges if within_range(index_range, k)]
-        if len(contained_ranges) == 0 and index_range not in seen_ranges:
-            seen_ranges[index_range] = nodes_in_range
-        else:
-            current_entry = contained_ranges[-1]
-            
-            current_start_index = index_range[0]
-            amount_to_prepend =  current_entry[0] - current_start_index
-            new_entry = []
-            for j in range(current_start_index, current_start_index + amount_to_prepend):
-                new_entry.append(ordering[j].id_)
-            contained_ranges.reverse()
-            for r in contained_ranges:
-                new_entry.append(seen_ranges[r])
-                seen_ranges.pop(r, None)
-            seen_ranges[index_range] = new_entry
-   
-    
-    # now have the necessary lists, need to add in the non-nested data
-    if len(seen_ranges) > 1:
-       LOGGER.WARN('Found more than one final range, need to investigate')
-      
-    final_range = list(seen_ranges.keys())[0]
-    final_nested_structure = []
-    for i in range(final_range[0]):
-        final_nested_structure.append(ordering_[i].id_)
-    final_nested_structure.append(seen_ranges[final_range])
-    total_nested_count = 0
-    
-    for i in range(final_range[1]+1, len(ordering_)):
-        final_nested_structure.append(ordering_[i].id_)
-        
-    def recur_print(nested_list, indent_level=0):
-        for x in nested_list:
-            
-            if isinstance(x, list):
-                print("INDENTING")
-                indent_level += 1
-                recur_print(x, indent_level)
-                indent_level -= 1
-                
-            else:
-                tab_str = indent_level * '\t'
-                print(f'{tab_str}{x}')
-    recur_print(final_nested_structure)
-    print(final_nested_structure)
-    return None

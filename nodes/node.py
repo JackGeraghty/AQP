@@ -3,8 +3,7 @@
 import logging
 import drawoptions as dopt
 
-from pipeline import LOGGER_NAME
-
+LOGGER_NAME = 'pipeline'
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 class Node(object):
