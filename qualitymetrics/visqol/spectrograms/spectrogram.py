@@ -8,8 +8,9 @@ from .goertzel import goertzel
 from typing import Tuple
 from qualitymetrics.visqol.filterbank import Filterbank
 from qualitymetrics.visqol.analysiswindow import AnalysisWindow
+from constants import LOGGER_NAME
 
-LOGGER = logging.getLogger('pipeline')
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 def calculate_time_spaces(window_overlap: float, signal_len: int, 
                           analysis_window_len: int, sample_rate: int) -> list:

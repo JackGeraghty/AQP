@@ -28,15 +28,15 @@ import json
 import logging
 import sys
 import graphutils
-import os
-import networkx as nx
+import graphvis
+import time
+import subprocess
 
+from shutil import which
 from pathlib import Path
-from networkx.drawing.nx_pydot import write_dot
+from constants import LOGGER_NAME
 
-LOGGER_NAME = 'pipeline'
-
-VERSION = '0.99'
+VERSION = '1.1.0'
 logging.basicConfig(
     format='%(asctime)s, %(levelname)s %(message)s', datefmt='%H:%M:%S')
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -50,33 +50,52 @@ def main() -> None:
     if args.plot_graph and not args.graph_output_file:
         raise ValueError(
             'If plotting call graph then the output file must also be specified')
-        sys.exit(-1)
 
     try:
         with open(Path(args.graph_config_path), 'rb') as data:
             nodes = graphutils.build_graph(json.load(data))
             root_node = nodes[args.root_node_id]
+            LOGGER.info('Performing validation checks')
+            valid, ordering = graphutils.validate_graph(root_node)
+            # Exit if not valid
+            if not valid:
+                LOGGER.error('Failed validation')
+                sys.exit(1)
+            LOGGER.info('Passed validation')
     except FileNotFoundError as err:
         LOGGER.error(err)
-        sys.exit(-1)
-
+        sys.exit(1)
 
     if args.plot_graph:
-        nx_graph = graphutils.build_nx_graph(root_node, edge_list=[], nx_graph=nx.DiGraph())
-        if not os.path.exists(args.graph_output_file):
-            os.makedirs(args.graph_output_file)
-        for node in nx_graph.nodes:
-            draw_options = nx_graph.nodes[node]['data'].draw_options
-            if draw_options:
-                nx_graph.nodes[node].update(draw_options)
-        write_dot(nx_graph, args.graph_output_file + '.dot')    
-        LOGGER.info('Graphs written to .dot files')
+        dot = graphvis.generate_dot_file(ordering)
+        try:
+            with open(args.graph_output_file + '.dot', 'w+') as f:
+               LOGGER.info(f'Succesfully opened {args.graph_output_file}.dot')
+               f.write(dot)
+        except FileNotFoundError as err:
+            LOGGER.error(err)
+
+        if which('dot'):
+            LOGGER.info('Found the dot command, creating svg and png output for dot file')
+            svg_dot_command = f'dot -Tsvg {args.graph_output_file}.dot -o {args.graph_output_file}.svg'
+            subprocess.call(svg_dot_command, shell=True)
+            png_dot_command = f'dot -Tpng {args.graph_output_file}.dot -o {args.graph_output_file}.png'
+            subprocess.call(png_dot_command, shell=True)
+            LOGGER.info('Finished creating output iamges from dot file')
+
+    # If we're just performing validation then exit with an ok status code
+    if args.validate:
+        LOGGER.info('Just performing validation, exitting early')
+        sys.exit(0)
 
     result = {}
+    start_time = time.time()
     LOGGER.info("Running pipeline...")
     graphutils.run_node(root_node, result)
     LOGGER.info("Finished running pipeline.")
-
+    end_time = time.time()
+    LOGGER.info(f'Elapsed time: {end_time - start_time}')
+    
 
 def init_argparser() -> argparse.ArgumentParser:
     """Initialize an argument parser with all of the possible command line arguments that can be passed to AQP.
@@ -94,6 +113,7 @@ def init_argparser() -> argparse.ArgumentParser:
     optional.add_argument('--plot_graph',action='store_true', default=False)
     optional.add_argument('--graph_output_file', default='results/graph')
     optional.add_argument('--debug', action='store_true', default=False)
+    optional.add_argument('--validate', action='store_true', default=False)
     optional.add_argument('-v', '--version', action='version',
                           version=f'{parser.prog} version {VERSION}')
     return parser

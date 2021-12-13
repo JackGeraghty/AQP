@@ -6,7 +6,7 @@ import logging
 from .node import AQPNode
 from pathlib import Path
 from librosa import load
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 

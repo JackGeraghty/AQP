@@ -5,13 +5,13 @@ import sys
 import json
 import graphutils
 
-from .node import AQPNode
+from .node import NestedNode
 from pathlib import Path
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
-class EncapsulationNode(AQPNode):
+class EncapsulationNode(NestedNode):
     """An EncapsulationNode is used to group a set of nodes together.
     
     These nodes are then executed as a single operation. 

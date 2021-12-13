@@ -3,12 +3,12 @@
 import logging
 import graphutils
 
-from .node import AQPNode
-from pipeline import LOGGER_NAME
-
+from .node import NestedNode
+from constants import LOGGER_NAME
 LOGGER = logging.getLogger(LOGGER_NAME)
 
-class LoopNode(AQPNode):
+
+class LoopNode(NestedNode):
     """Node which loops over some iterable contained within the result dictionary and executes it's execution node using that iterable value."""
     
     def __init__(self, id_: str, output_key: str, node_data: dict,

@@ -1,7 +1,7 @@
 import numpy as np
 import librosa
-from ..node import WarpQNode
 
+from ..node import WarpQNode
 
 class WarpQSDTWNode(WarpQNode):
     

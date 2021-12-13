@@ -3,7 +3,7 @@
 import logging
 import drawoptions as dopt
 
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
@@ -69,6 +69,23 @@ class Node(object):
         return len(self.children) == 0
 
 
+    def set_n_id(self, n_id: int):
+        self.n_id = n_id
+
+
+    def __dict__(self):
+        return {
+                "id_": self.id_,
+                "output_key": self.output_key,
+                "children": self.children if self.children else [],
+                "type_": self.type_
+            }
+    
+    
+    def __str__(self):
+        as_dict = self.__dict__()
+        return str(as_dict)
+
 class AQPNode(Node):
     """Class for the core nodes of the pipeline, that should be reusable regardless of the quality metric being tested.
         
@@ -115,3 +132,14 @@ class WarpQNode(Node):
     
     def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
         super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['WARP-Q'], draw_options))
+    
+        
+class NestedNode(Node):
+    """Class for the Nested node(s) of the pipeline.
+    
+    Only difference between this and the base Node class is this class 
+    contains specific drawing options for producing a graph. These options
+    are overridable and are just used to differentiate between nodes.
+    """
+    def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
+        super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['NESTED'], draw_options))

@@ -4,10 +4,11 @@ import logging
 import numpy as np
 
 from dataclasses import dataclass, field
+from constants import LOGGER_NAME
 from scipy.signal.windows import triang, hann
 from qualitymetrics.visqol.constants import BAND_FREQUENCIES
 
-LOGGER = logging.getLogger('pipeline')
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 @dataclass
 class Filterbank:
