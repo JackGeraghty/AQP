@@ -56,6 +56,8 @@ For more Unix based install instructions go to https://subversion.apache.org/pac
 
 There is also information there for Windows users, but likely the easiest method is to just download the full dataset repository.
 
+To make full use of the pipelines visualization capabilities, it is recommended to install Graphviz. Graph visualization is a way of representing structural information as diagrams of abstract graphs and networks. Instructions on how to install Graphviz can be found [here](https://graphviz.org/download/).
+
 ### Quickstart Example
 
 To get a quick idea of how the pipeline works and can be used to run an experiment there is a quickstart example that is designed to get the pipeline working in a few easy steps.
@@ -80,7 +82,7 @@ For those who don't have access to <u>subversion</u> and <u>wget</u>.
 3. From the root directory of AQP, execute the following 
 
    ```
-   python utils/prepend_files.py --prepend_with "resources/" --dataset "resources/quickstart_genspeech.csv"
+   python scripts/prepend_files.py --prepend_with "resources/" --dataset "resources/quickstart_genspeech.csv"
    python pipeline.py --root_node_id "Load DF" --graph_config_path "config/example.json" --plot_graph
    ```
 
@@ -94,7 +96,7 @@ After executing the quickstart example through either method described above the
 It is also easy to extend the above example to recreate the case study performed in the AQP paper. On Mac/Unix, execute the ``genspeech.sh`` script from inside the scripts directory to download the entire Genspeech dataset and csv file.  Then from the root directory execute the following commands:
 
 ```
-python utils/prepend_files.py --prepend_with "resources/" --dataset "resources/genspeech.csv"
+python scripts/prepend_files.py --prepend_with "resources/" --dataset "resources/genspeech.csv"
 python pipeline.py --root_node_id "Load DF" --graph_config_path "config/warpq_pesq_dataset.json" --plot_graph
 ```
 
@@ -112,7 +114,9 @@ There are several arguments which can be passed to AQP, some are required, other
 The other options are:
 
 - ``--plot_graph``: Flag to create a diagram of the pipeline, default is False.
+- ``--output_dir``: Path to a directory for any files produced, default is ``results/``
 - ``--graph_output_file``: Path to file to store the created DOT file, do NOT include the file extension (this is done automatically), default is "results/graph". This gets expanded to, for example, "results/graph.dot".
+- ``--validate:`` Signals that the pipeline should just be validated and optionally graphed. Pipeline will not run if this is set to ``True``.
 - ``--debug``: Enables debug logging.
 - ``--version``: Prints the version.
 
@@ -126,7 +130,7 @@ In future we plan on adding more quality metrics, datasets and core nodes to the
 
 ## Node Abstract Class
 
-Nodes are used to encapsulate some unique logic/functionality, but there is common properties/functionality to all nodes. These are defined in the abstract Node class (found in nodes/node.py). 
+Nodes are used to encapsulate some unique logic/functionality, but there is common properties/functionality to all nodes. These are defined in the abstract Node class (found in nodes/node.py). Node **must be** contained within the ``nodes`` directory. Any node placed in this directory will be detected by the pipeline and will be available for use.
 
 ```python
 class Node(object):
@@ -247,7 +251,7 @@ The pipeline is defined as a collection of connected nodes. This information is 
 
 The above configuration results in a graph that looks like the image below. 
 
-![](C:\Users\jgera\Documents\ComputerScience\AQP\images\example_simple_pipeline.png "Simple pipeline")
+![](images/example_simple_pipeline.png "Simple pipeline")
 
 ## Advanced Nodes
 
@@ -318,7 +322,7 @@ An id of the starting node in the sub-graph must be provided in both cases.
 }
 ```
 
-The JSON below is the contents of ``config/visqol/graphs/default_visqol_mel.json`` 
+The JSON below is the contents of ``config/visqol/graphs/default_visqol_mel.json`` (found under the ``visqol_dev branch`` or ``feature_dev_two`` for now)
 
 ```json
 {
@@ -436,7 +440,7 @@ Example
 		"type": "LoadCSVAsDFNode",
 		"children": ["Wrangle Data"],
 		"output_key": "dataframe",
-		"path_to_csv": "resources/genspeech.csv"
+		"path_to_csv": "resources/quickstart_genspeech.csv"
 	},
 	"Wrangle Data": {
 		"type": "TransformNode",
@@ -528,9 +532,6 @@ Example
 				"function_args": {
 					"key": "warp_q_mel",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#d55c00B3"
 				}
 			},
 			"Update DF MFCC": {
@@ -540,16 +541,7 @@ Example
 				"function_args": {
 					"key": "warp_q_mfcc",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#d55c00B3"
 				}
-			},
-			"Modified VAD": {
-				"type": "WarpQVADNode",
-				"children": ["MFCC"],
-				"ref_sig_key": "reference_signal",
-				"deg_sig_key": "degraded_signal"
 			},
 			"PESQ": {
 				"type": "EncapsulationNode",
@@ -564,9 +556,6 @@ Example
 						"type": "PyPESQNode",
 						"output_key": "pesq"
 					}
-				},
-				"draw_options": {
-					"fillcolor": "#009e74B3"
 				}
 			},
 			"Update DF PESQ": {
@@ -576,9 +565,6 @@ Example
 				"function_args": {
 					"key": "pesq",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#009e74B3"
 				}
 			}
 		}
@@ -605,12 +591,22 @@ Example
 
 
 
-## Drawing the Pipeline
+## Visualizing the Pipeline
 
-It is possible to output a diagram of the pipeline. This functionality is based on a combination of [GraphViz](https://graphviz.org/) and the [NetworkX](https://networkx.org/) python package. If the ``--plot_graph`` command-line argument is set, then a NetworkX version of the pipeline is built, has the ``draw_options`` associated with each node applied to the NetworkX version of the node, and finally a ``.dot`` file is generated for the graph, which can be visualized with GraphViz. Currently, only one version of the graph is produced, where all nodes, that aren't part of an EncapsulationNode are graphed. 
+It is possible to produce a visual output of the pipeline. This visualization shows the connections between nodes and clusters of nodes that are related due to a *NestedNode*. These clusters are shown by boxes drawn around nodes that belong to a NestedNode. The first node in these clusters is the *NestedNode* itself, then it contains the nodes connected to the *execution_node* of the *NestedNode*.
 
-Ideally, EncapsulationNodes will be included in future, the current issue with it relates to loop nodes within an encapsulation node and connecting them to the appropriate nodes. 
+The visualization is produced by means of the [DOT language](https://graphviz.org/doc/info/lang.html). The DOT file produced by the pipeline can be modifying to add any additional drawing information. If [Graphviz](https://graphviz.org/download/) is installed on your machine and the ``dot`` command is available in the terminal then after the DOT file is created this command is invoked and a PNG and SVG version of the DOT file is created. 
 
-Another future possibility is the drawing of a box, or something similar around loop nodes and encapsulation nodes, to highlight that they are different from the rest of the graph.
+The *draw_options* passed to a given node are used here to produce the desired colours/shapes/etc. in the visualization. Further, global DOT attributes such as "rankdir" can be specified(as it was to produce the images below) in the ``config/dot_config.json`` file. All entries in this JSON file will be added to the top of the DOT output. 
 
 ![Case study pipeline](images/warpq_pesq.png "Diagram output for the Comparing WarpQ and PESQ")
+
+![Case study pipeline](images/warpq_pesq_old.png "Old Diagram output for the Comparing WarpQ and PESQ")
+
+The top image is the output produced from running the ``scripts/run_example.sh`` script, which uses the ``config/example.json`` configuration. The below image is the output of the previous visualization implementation.
+
+
+
+The large pipeline visualization below is generated from the ``config/colour_demo.json`` configuration (currently found in the ``feature_dev_two`` branch). It contains nodes from each of the node superclasses, ViSQOL, WARP-Q, PESQ, Nested and the default AQP. It's purpose is to show off all the different colours, as well as serve as another example of how the pipeline can be put together.
+
+ ![colour_demo](./images/colour_demo.png)
