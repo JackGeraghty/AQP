@@ -4,9 +4,9 @@ import sys
 import logging
 import pandas as pd
 
-from pathlib import Path
 from .node import AQPNode
-from pipeline import LOGGER_NAME
+from pathlib import Path
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 

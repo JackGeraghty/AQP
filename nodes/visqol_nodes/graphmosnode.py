@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..node import ViSQOLNode
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 PLOT_TYPES = ['box', 'scatter']

@@ -8,10 +8,11 @@ import cmath
 
 from multiprocessing import shared_memory
 from queue import Empty
+from constants import LOGGER_NAME
 from qualitymetrics.visqol.filterbank import Filterbank
 from qualitymetrics.visqol.analysiswindow import AnalysisWindow
 
-LOGGER = logging.getLogger('pipeline')
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 def goertzel(signal: np.ndarray,
              sample_rate: int,

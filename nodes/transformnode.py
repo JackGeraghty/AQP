@@ -73,7 +73,7 @@ def tuple_to_top_level(result: dict, target_key: str,
 
 
 def update_df(result: dict, target_key: str, 
-                                 key: str, col_name: str='ref_wav', deg_col='Test_Wave',
+                                 key: str, col_name: str='Ref_Wave', deg_col='Test_Wave',
                                  file_name_key: str='reference_file', test_file_name_key='degraded_file', **kwargs):
     """Update the dataframe being used based on the col_name and ref_file_name_key arguments, with the value stored at the key.
 

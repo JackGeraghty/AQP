@@ -4,7 +4,7 @@ import numpy as np
 import logging
 
 from ..node import ViSQOLNode
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 from libsvm.svmutil import svm_load_model, svm_predict
 
 from functools import reduce  

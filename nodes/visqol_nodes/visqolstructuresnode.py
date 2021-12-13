@@ -11,7 +11,7 @@ from qualitymetrics.visqol.channelconfig import ChannelConfig, setup_channel_con
 from qualitymetrics.visqol.filterbank import create_filterbank, MelFilter
 from qualitymetrics.visqol.visqolarguments import VisqolArguments
 from qualitymetrics.visqol.visqoloptions import VisqolOptions
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME, VISQOL_STRUCTURES_CONFIG
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
@@ -19,7 +19,7 @@ class VisqolStructuresNode(ViSQOLNode):
     """Handles the setup of the various, configurable settings of ViSQOL."""
 
     def __init__(self, id_: str, output_key: str, 
-                 config_file_path: str='config/visqol/structures_config.json', 
+                 config_file_path: str=VISQOL_STRUCTURES_CONFIG, 
                  draw_options: dict=None, **kwargs): 
         """Initialize a ViSQOLStructuresNode.
         

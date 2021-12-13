@@ -95,9 +95,6 @@
 				"function_args": {
 					"key": "warp_q_mel",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#d55c00B3"
 				}
 			},
 			"Update DF MFCC": {
@@ -107,9 +104,6 @@
 				"function_args": {
 					"key": "warp_q_mfcc",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#d55c00B3"
 				}
 			},
 			"PESQ": {
@@ -125,9 +119,6 @@
 						"type": "PyPESQNode",
 						"output_key": "pesq"
 					}
-				},
-				"draw_options": {
-					"fillcolor": "#009e74B3"
 				}
 			},
 			"Update DF PESQ": {
@@ -137,9 +128,6 @@
 				"function_args": {
 					"key": "pesq",
 					"col_name": "Ref_Wave"
-				},
-				"draw_options": {
-					"fillcolor": "#009e74B3"
 				}
 			}
 		}

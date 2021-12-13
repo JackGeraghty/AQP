@@ -5,7 +5,7 @@ import math
 import logging
 from dataclasses import dataclass, field
 from typing import Callable, Dict
-from pipeline import LOGGER_NAME
+from constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 

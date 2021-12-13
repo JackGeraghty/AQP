@@ -1,5 +1,4 @@
 from ..node import WarpQNode
-
 from pyvad import vad
 
 class WarpQVADNode(WarpQNode):

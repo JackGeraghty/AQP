@@ -3,18 +3,22 @@
 import importlib
 import logging
 
-from nodes.node import Node
-from nodes.loopnode import LoopNode
-from nodes.encapsulationnode import EncapsulationNode
+from constants import LOGGER_NAME
+from nodes.node import NestedNode, Node
 from pathlib import Path
-from typing import Dict
-LOGGER_NAME = 'pipeline'
+from typing import Dict, List, Tuple
+
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 AVAILABLE_NODES = {path.name[:-len('.py')].lower(): str(path)[:-len('.py')].lower(
 ).replace('/', '.').replace('\\', '.') for path in Path('nodes/').rglob('*.py')}
 LOGGER.debug("Available Nodes: %s", AVAILABLE_NODES)
 
+# Global list of deserialized nodes
+DESERIALIZED_NODES = []
+
+# Global counter to ensure each node deserialized gets a unique int id
+n_id = 0
 
 def _deserialize(data: dict, node_id: str) -> Node:
     """Deserialize a dictionary, loaded from a json file to a Node
@@ -88,9 +92,6 @@ def run_node(node: Node, result: dict, **kwargs):
             stack.append(children[i])
 
 
-DESERIALIZED_NODES = []
-n_id = 0
-
 def build_graph(graph_definition: dict) -> Dict[Node, str]:
     """
     Creates the graph using the provided graph definition. Does this by
@@ -128,7 +129,46 @@ def build_graph(graph_definition: dict) -> Dict[Node, str]:
     return nodes
 
 
-def check_for_cycles(start_node):
+def is_nested_node(node: Node) -> bool:
+    """
+        Simple function which wraps the isinstance call below. This function is 
+        really just a rename that makes it more intuitive than isinstance(node, NestedNode)
+
+        Parameters
+        ----------
+        node: Node
+            The node to evaluate
+
+        Returns
+        -------
+        is_nested_node: bool
+            Indicates if the node is either a LoopNode or EncapsulationNode
+    """
+    return isinstance(node, NestedNode)
+
+
+def check_for_cycles(start_node: Node) -> List[Node]:
+    """
+    Performs a check on the graph created from the json config for cycles. 
+    The pipeline operates using a Directed Acylic Graph(DAG) so no cycles can exist
+
+    Checks for cycles by performing a depth first search and maintaining a list of 
+    visited nodes. If a node that is in the visited set appears again it is part 
+    of a cyle. 
+
+    Parameters
+    ----------
+    start_node : Node
+        The node to start the dfs from
+
+    Returns
+    -------
+        ordering: List[Node]
+            A list containing the order in which nodes will be visited. Required for
+            further validation of the graph. If a cycle is detected this function 
+            returns None
+        
+    """
     stack = []
     stack.append(start_node)
     ordering = []
@@ -142,9 +182,12 @@ def check_for_cycles(start_node):
         ordering.append(node)
         children = node.children
 
-        if isinstance(node, (LoopNode, EncapsulationNode)):
-            for c in children:
-                stack.append(c)    
+        # If the current node is a nested node then append all the children first
+        # then append the nodes' execution node. This ensures proper order since
+        # the most recent element on the stack gets evaluated first, LIFO
+        if is_nested_node(node):
+            for child_node in children:
+                stack.append(child_node)    
             stack.append(node.execution_node)
         else:
             for i in range(len(children)-1, -1, -1):
@@ -153,16 +196,60 @@ def check_for_cycles(start_node):
     return ordering
 
 
-def has_unreachable_nodes(ordering):
+def has_unreachable_nodes(ordering: List[Node]) -> bool:
+    """
+    Performs a check for unreachable nodes in the graph. Unreachable nodes
+    are likely not intended and can lead to time lost to debugging why the 
+    graph pipeline isn't working as intended.
+
+    Determines unreachable nodes by utilizing the ordering of nodes
+    returned from the check_for_cycles function and an auxillary set
+    created during node deserialization. It loops over each node that 
+    was deserialized and checks to see if that node is within the 
+    execution order of the nodes. If it's not there then it has been
+    deserialized but is not reachable.
+
+    Parameters
+    ----------
+    ordering: List[Node]
+        List containing the order in which all nodes will be executed
+
+    Returns
+    -------
+    has_unreachable_nodes: bool
+        Boolean indicating whether or not there is an unreachable node
+    """
     ordering_ids = [i.id_ for i in ordering]
+    unreachable_nodes = set()
     for deserialized_node in DESERIALIZED_NODES:
         if deserialized_node not in ordering_ids:
-            LOGGER.error("Found unreachable node %s", deserialized_node)
-            return True
-    return False
+            unreachable_nodes.add(deserialized_node)
+
+    if len(unreachable_nodes) > 0:
+        LOGGER.error("Found unreachable nodes %s", unreachable_nodes)
+    return len(unreachable_nodes) != 0 
 
 
-def validate_graph(root_node):
+def validate_graph(root_node: Node) -> Tuple[bool, List[Node]]:
+    """
+    Checks the deserialized graph for cycles and unreachable nodes. Does
+    this by running the check_for_cycles function followed by the 
+    has_unreachable_nodes function.
+
+    Parameters
+    ----------
+    root_node: Node
+        The root node of the graph
+
+    Returns
+    -------
+    validation_info: Tuple[bool, List[Node]]
+        A tuple where the first element is a boolean indicating whether the 
+        graph has unreachable nodes. This is negated to match up with name of 
+        the function.
+
+        The second element is then the execution order of the pipeline.
+    """
     if (ordering := check_for_cycles(root_node)) is None:
         return False
     return not has_unreachable_nodes(ordering), ordering

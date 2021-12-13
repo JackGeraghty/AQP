@@ -12,8 +12,8 @@
 		"target_key": "dataframe",
 		"output_key": "wav_files",
 		"function_args": {
-			"col_one": "ref_wav",
-			"col_two": "deg_wav"
+			"col_one": "Ref_Wave",
+			"col_two": "Test_Wave"
 		}
 	},
 	"dataset_loop": {

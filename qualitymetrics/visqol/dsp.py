@@ -7,9 +7,11 @@ from typing import Callable, Tuple
 from .nsim import nsim_map
 from scipy.interpolate import RectBivariateSpline
 from scipy.signal import hilbert, correlate, correlation_lags
+from constants import LOGGER_NAME
+
 PATCH_SIZE = 30
 
-LOGGER = logging.getLogger('pipeline')
+LOGGER = logging.getLogger(LOGGER_NAME)
 
 def calculate_SPL(signal: np.ndarray) -> float:
     return 20 * math.log10(math.sqrt(np.mean(np.square(signal))) / 20e-6)

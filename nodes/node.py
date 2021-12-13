@@ -3,8 +3,9 @@
 import logging
 import drawoptions as dopt
 
-LOGGER_NAME = 'pipeline'
+from constants import LOGGER_NAME
 LOGGER = logging.getLogger(LOGGER_NAME)
+
 
 class Node(object):
     """Base abstract implementation of the Node class.
@@ -132,3 +133,9 @@ class WarpQNode(Node):
     
     def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
         super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['WARP-Q'], draw_options))
+    
+        
+class NestedNode(Node):
+    
+    def __init__(self, id_: str, output_key: str=None, draw_options: dict=None, **kwargs):
+        super().__init__(id_, output_key=output_key, draw_options=dopt.create_full_options(dopt.DRAW_OPTIONS['NESTED'], draw_options))
