@@ -20,9 +20,7 @@ Due to this repository being included in the submission, detailed in the next se
 
 ## Citing AQP
 
-The AQP paper is currently under review for the IEEE ICASSP 2022 conference. The design of AQP is described in the following paper available on arXiv. 
-
-[J. Geraghty, J. Li, A. Ragano and A. Hine, "AQP: An Open Modular Python Platform for Objective Speech and Audio Quality Metrics", submitted to IEEE ICASSP 2022](https://arxiv.org/abs/2110.13589#)
+The AQP paper has been accepted to MMSys22, Athlone, Ireland. Citation will be uploaded afterwards
 
 ---
 

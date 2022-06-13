@@ -58,10 +58,10 @@ def main() -> None:
             LOGGER.info('Performing validation checks')
             valid, ordering = graphutils.validate_graph(root_node)
             # Exit if not valid
-            if not valid:
-                LOGGER.error('Failed validation')
-                sys.exit(1)
-            LOGGER.info('Passed validation')
+            # if not valid:
+            #     LOGGER.error('Failed validation')
+            #     sys.exit(1)
+            # LOGGER.info('Passed validation')
     except FileNotFoundError as err:
         LOGGER.error(err)
         sys.exit(1)
